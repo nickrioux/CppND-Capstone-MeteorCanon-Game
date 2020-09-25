@@ -9,7 +9,7 @@ class Sprite {
 
     public :
 
-    Sprite(SDL_Texture * img,int,int);
+    Sprite(SDL_Texture * img,int,int,float,float);
     ~Sprite();
 
     void Render(SDL_Renderer *, SDL_Rect *);
@@ -18,12 +18,15 @@ class Sprite {
     int GetX() { return(_rect.x); }
     int GetY() { return(_rect.y); }
 
-    int GetSize() { return(_rect.w); }
+    float GetGridSizeW() { return(_gridSizeW); }
+    float GetGridSizeH() { return(_gridSizeH); }
 
     private:
 
         SDL_Texture * _img;
         SDL_Rect      _rect;
+        float _gridSizeW;
+        float _gridSizeH;
 };
 
 #endif

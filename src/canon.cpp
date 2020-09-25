@@ -50,8 +50,8 @@ void ControllerInputComponent::update(GameObject & obj, Game & game) {
     }
 
     // Bounce the Canon around if going off of the screen.
-    if ((obj.GetX()) >= (game.GetWidth() - 4)) {
-      obj._x = game.GetWidth()-4;
+    if ((obj.GetX()+obj.GetW()) >= (game.GetWidth())) {
+      obj._x = game.GetWidth()-obj.GetW()-1;
       _currentDirection = Direction::kLeft;
     }
     else if ((obj.GetX()) <= 0) {

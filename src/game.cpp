@@ -20,10 +20,11 @@ void Game::init(Renderer & renderer, Controller const & controller) {
     ControllerInputComponent * canonController = new ControllerInputComponent(controller);
     CanonPhysicsComponent * canonPhysics = new CanonPhysicsComponent();
 
-    _canon = std::make_unique<Canon>(canonController, canonPhysics, canonGraphics);
+    //Compute Grid Size
+    _canon = std::make_unique<Canon>(canonController, canonPhysics, canonGraphics, canonSprite->GetGridSizeW(), canonSprite->GetGridSizeH());
 
     _canon->_x = _grid_width/2;
-    _canon->_y = _grid_height-4;
+    _canon->_y = _grid_height-_canon->GetH();
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,

@@ -1,7 +1,7 @@
 #include "SDL.h"
 #include "sprite.h"
 
-Sprite::Sprite(SDL_Texture * img, int w, int h) : _img(img) {
+Sprite::Sprite(SDL_Texture * img, int w, int h,float gridW, float gridH) : _img(img), _gridSizeW(gridW), _gridSizeH(gridH) {
         _rect.x = 0;
         _rect.y = 0;
         _rect.w = w;

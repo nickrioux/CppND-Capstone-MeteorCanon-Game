@@ -15,7 +15,7 @@ class Renderer {
   ~Renderer();
 
   void Render(Snake const snake, SDL_Point const &food);
-  void Render(std::shared_ptr<Sprite> sprite,int, int);
+  void Render(std::shared_ptr<Sprite> sprite,float, float);
   void Render(GameObject & gameobject);
   void UpdateWindowTitle(int score, int fps);
 

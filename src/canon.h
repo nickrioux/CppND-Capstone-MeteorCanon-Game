@@ -36,8 +36,8 @@ class Canon : public GameObject {
         public :
             Canon(ControllerInputComponent * controllerComponent,
                   CanonPhysicsComponent * physicsComponent, 
-                  CanonGraphicsComponent * graphicsComponent) 
-            : GameObject(controllerComponent, physicsComponent, graphicsComponent) {};
+                  CanonGraphicsComponent * graphicsComponent,float w, float h) 
+            : GameObject(controllerComponent, physicsComponent, graphicsComponent,w,h) {};
             ~Canon() {};
 
         private :

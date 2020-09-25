@@ -47,14 +47,17 @@ std::shared_ptr<Sprite> Renderer::CreateSprite(std::string path) {
   SDL_Texture * texture = IMG_LoadTexture(renderer,path.c_str());
 #endif
   SDL_Surface * temp   = SDL_LoadBMP(path.c_str());
-  int w = temp->w;
-  int h = temp->h;
+  float w = temp->w;
+  float h = temp->h;
   int colorkey = SDL_MapRGB(temp->format, 255, 0, 255);
   SDL_SetColorKey(temp, SDL_TRUE, colorkey);
   SDL_Texture * texture = SDL_CreateTextureFromSurface(sdl_renderer, temp);
   SDL_FreeSurface(temp);
 
-  return(std::make_shared<Sprite>(texture,w,h));
+  float gridUnitW = w/(static_cast<float>(screen_width) / grid_width);
+  float gridUnitH = h/(static_cast<float>(screen_height) / grid_height);
+
+  return(std::make_shared<Sprite>(texture,w,h,gridUnitW,gridUnitH));
 }
 
 void Renderer::Render(Snake const snake, SDL_Point const &food) {
@@ -124,14 +127,14 @@ void Renderer::Render(GameObject & gameobject) {
   SDL_RenderPresent(sdl_renderer);
 }
 
-void Renderer::Render(std::shared_ptr<Sprite> sprite, int x, int y) {
+void Renderer::Render(std::shared_ptr<Sprite> sprite, float x, float y) {
   SDL_Rect block;
-  block.w = screen_width / grid_width;
-  block.h = screen_height / grid_height;
-  block.x = static_cast<int>(x) * block.w;
-  block.y = static_cast<int>(y) * block.h;
-  block.w = 35;
-  block.h = 39;
+  float w = static_cast<float>(screen_width) / grid_width;
+  float h = static_cast<float>(screen_height) / grid_height;
+  block.x = static_cast<int>(x) * w;
+  block.y = static_cast<int>(y) * h;
+  block.w = w * sprite->GetGridSizeW();
+  block.h = h * sprite->GetGridSizeH();
 
   sprite->Render(sdl_renderer,&block);    
 }
