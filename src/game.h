@@ -38,22 +38,40 @@ class Game {
      Map * _map;
      Entity * _player;
      Entity * _scoreLabel;
+     Entity * _levelLabel;
      bool _runningStatus{true};
      int _score{0};
+     int _currLevel{1};
      float _speedFactor{1.0f};
      int _ticksLastFrame{0};
      int _width;
      int _height;
 
+     //Random Generator
+     std::random_device _rd;
+     std::mt19937  _gen;
+     std::uniform_int_distribution<int> _random_pos_w;
+     std::uniform_int_distribution<int> _random_degree_left;
+     std::uniform_int_distribution<int> _random_degree_right;
+     std::uniform_int_distribution<int> _random_speed;
+     std::uniform_int_distribution<int> _random_meteor;
+
+
      void loadLevel(int levelNo);
      void init(int width, int height);
      void processInput();
      void update(std::size_t target_frame_duration);
+     void updateLevel();
+     void updateUI();
      void handleCameraMovement();
      void render();
      void checkCollisions();
      void destroy();
      void adjustCanonPosition(GameConstants::CollisionType);
+     void generateMeteor(float deltaTime);
+     void generateUFO();
+     void generateMissile();
+     void processMeteorExplode(Entity * meteor);
 };
 
 #endif
