@@ -4,10 +4,8 @@
 int main() {
   constexpr std::size_t kFramesPerSecond{60};
   constexpr std::size_t kMsPerFrame{1000 / kFramesPerSecond};
-  constexpr std::size_t kScreenWidth{640};
-  constexpr std::size_t kScreenHeight{480};
-  constexpr std::size_t kGridWidth{128};
-  constexpr std::size_t kGridHeight{128};
+  constexpr std::size_t kScreenWidth{1024};
+  constexpr std::size_t kScreenHeight{768};
 
   Game *game = Game::GetGame();
 

@@ -18,7 +18,7 @@ class Entity {
     
     public :
         Entity(EntityManager& manager);
-        Entity(EntityManager& manager, std::string name, GameConstants::LayerType layerType);
+        Entity(EntityManager& manager, std::string name, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
         ~Entity() {};
 
         bool IsActive() const;
@@ -29,6 +29,7 @@ class Entity {
 
         const string & GetName() const { return _name; } 
         const GameConstants::LayerType GetLayer() const { return _layerType; }
+        const GameConstants::EntityType GetEntityType() const { return _entityType; }
 
         template <typename T, typename... TArgs>
         T& AddComponent(TArgs&&... args) {
@@ -52,6 +53,7 @@ class Entity {
 
     private:
         string _name;
+        GameConstants::EntityType _entityType;
         EntityManager & _manager;
         vector<Component *> _components;
         GameConstants::LayerType _layerType;

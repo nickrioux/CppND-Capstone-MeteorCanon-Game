@@ -24,18 +24,8 @@ class TransformComponent: public Component {
         }
 
         void Update(float deltaTime) override {
-            _position.x += _velocity.x * deltaTime;
-            _position.y += _velocity.y * deltaTime;
-#if 0
-            if (_position.x < 0)
-            {
-                _position.x = 0;
-            }
-
-            if ((_position.x + _width) > Game::GetGame()->GetCamera()->w) {
-                _position.x = Game::GetGame()->GetCamera()->w - _width;
-            }
-#endif
+            _position.x += _velocity.x * deltaTime * Game::GetGame()->GetSpeedFactor();
+            _position.y += _velocity.y * deltaTime * Game::GetGame()->GetSpeedFactor();
         }
 
         glm::vec2 & GetPosition()  {return(_position);}

@@ -8,7 +8,7 @@ Entity::Entity(EntityManager& manager): _manager(manager) {
     _isActive = true;
 }
 
-Entity::Entity(EntityManager& manager, std::string name, GameConstants::LayerType layerType): _manager(manager), _name(name), _layerType(layerType) {
+Entity::Entity(EntityManager& manager, std::string name, GameConstants::EntityType entityType, GameConstants::LayerType layerType): _manager(manager), _name(name), _entityType(entityType), _layerType(layerType) {
     _isActive = true;
 }
 

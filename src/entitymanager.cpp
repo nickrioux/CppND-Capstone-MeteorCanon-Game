@@ -1,4 +1,6 @@
 #include <iostream>
+#include <memory>
+
 #include "game.h"
 #include "entity.h"
 #include "collision.h"
@@ -15,6 +17,8 @@ void EntityManager::Update(float deltaTime) {
     for (auto & entity : _entities) {
             entity->Update(deltaTime);
     }
+
+    destroyInactiveEntities();
 }
 
 void EntityManager::Render() {
@@ -27,51 +31,82 @@ void EntityManager::Render() {
     }
 }
 
-GameConstants::CollisionType EntityManager::CheckCollisions() const {
+vector<EntityManager::CollisionData> EntityManager::CheckCollisions() const {
+    vector<EntityManager::CollisionData> collisions;
+
     for (int i = 0; i < _entities.size() - 1; i++) {
         auto& thisEntity = _entities[i];
         if (thisEntity->HasComponent<ColliderComponent>()) {
             ColliderComponent* thisCollider = thisEntity->GetComponent<ColliderComponent>();
-            for (int j = i + 1; j < _entities.size(); j++) {
+            for (int j = 0; j < _entities.size(); j++) {
                 auto& thatEntity = _entities[j];
                 if (thisEntity->GetName().compare(thatEntity->GetName()) != 0 && thatEntity->HasComponent<ColliderComponent>()) {
                     ColliderComponent* thatCollider = thatEntity->GetComponent<ColliderComponent>();
                     if (Collision::CheckRectCollision(thisCollider->GetCollider(), thatCollider->GetCollider())) {
+                        CollisionData collisionData;
+
+                        collisionData.entityOne = thisEntity;
+                        collisionData.entityTwo = thatEntity;
+
                         if (thisCollider->GetColliderTag().compare("PLAYER") == 0 && thatCollider->GetColliderTag().compare("METEOR") == 0) {
-                            return GameConstants::PLAYER_METEOR_COLLISION;
+                            collisionData.collisionType = GameConstants::PLAYER_METEOR_COLLISION;
+                            collisions.emplace_back(collisionData);
                         }
                         if (thisCollider->GetColliderTag().compare("PLAYER") == 0 && thatCollider->GetColliderTag().compare("MISSILE") == 0) {
-                            return GameConstants::PLAYER_MISSILE_COLLISION;
+                            collisionData.collisionType = GameConstants::PLAYER_MISSILE_COLLISION;
+                            collisions.emplace_back(collisionData);
                         }
-                        if (thisCollider->GetColliderTag().compare("METEOR") == 0 && thatCollider->GetColliderTag().compare("FRIENDLY_BULLET") == 0) {
-                            return GameConstants::ENEMY_BULLET_COLLISION;
+                        if (thisCollider->GetColliderTag().compare("METEOR") == 0 && thatCollider->GetColliderTag().compare("BULLET") == 0) {
+                            collisionData.collisionType = GameConstants::ENEMY_BULLET_COLLISION;
+                            collisions.emplace_back(collisionData);
                         }
                         if (thisCollider->GetColliderTag().compare("PLAYER") == 0 && thatCollider->GetColliderTag().compare("LEFT_BOUNDARY") == 0) {
-                            return GameConstants::PLAYER_LEFT_BOUNDARY_COLLISION;
+                            collisionData.collisionType = GameConstants::PLAYER_LEFT_BOUNDARY_COLLISION;
+                            collisions.emplace_back(collisionData);
                         }
                         if (thisCollider->GetColliderTag().compare("PLAYER") == 0 && thatCollider->GetColliderTag().compare("RIGHT_BOUNDARY") == 0) {
-                            return GameConstants::PLAYER_RIGHT_BOUNDARY_COLLISION;
+                            collisionData.collisionType = GameConstants::PLAYER_RIGHT_BOUNDARY_COLLISION;
+                            collisions.emplace_back(collisionData);
                         }
                         if (thisCollider->GetColliderTag().compare("PLAYER") == 0 && thatCollider->GetColliderTag().compare("SPINNER") == 0) {
-                            return GameConstants::PLAYER_SPINNER_COLLISION;
+                            collisionData.collisionType = GameConstants::PLAYER_SPINNER_COLLISION;
+                            collisions.emplace_back(collisionData);
                         }
                         if (thisCollider->GetColliderTag().compare("METEOR") == 0 && thatCollider->GetColliderTag().compare("GROUND") == 0) {
-                            return GameConstants::METEOR_GROUND_COLLISION;
+                            collisionData.collisionType = GameConstants::METEOR_GROUND_COLLISION;
+                            collisions.emplace_back(collisionData);
+                        }
+                        if (thisCollider->GetColliderTag().compare("METEOR") == 0 && thatCollider->GetColliderTag().compare("LEFT_BOUNDARY") == 0) {
+                            collisionData.collisionType = GameConstants::METEOR_BOUNDARY_COLLISION;
+                            collisions.emplace_back(collisionData);
+                        }
+                        if (thisCollider->GetColliderTag().compare("METEOR") == 0 && thatCollider->GetColliderTag().compare("RIGHT_BOUNDARY") == 0) {
+                            collisionData.collisionType = GameConstants::METEOR_BOUNDARY_COLLISION;
+                            collisions.emplace_back(collisionData);
                         }
                     }
                 }
             }
         }
     }
-    return GameConstants::NO_COLLISION;
+
+    return collisions;
 }
 
 bool EntityManager::HasNoEntities() {
     return(_entities.size() == 0);
 }
 
-Entity & EntityManager::AddEntity(std::string entityName, GameConstants::LayerType layerType) {
-    Entity *entity = new Entity(*this, entityName, layerType);
+void EntityManager::destroyInactiveEntities() {
+    for (int i = 0; i < _entities.size(); i++) {
+        if (!_entities[i]->IsActive()) {
+            _entities.erase(_entities.begin() + i);
+        }
+    }
+}
+
+Entity & EntityManager::AddEntity(std::string entityName, GameConstants::EntityType entityType, GameConstants::LayerType layerType) {
+    Entity *entity = new Entity(*this, entityName, entityType, layerType);
     _entities.emplace_back(entity);
     return *entity;
 }
