@@ -6,11 +6,10 @@
 
 using std::string;
 
-class TextureManager {
-    public:
-        static SDL_Texture* LoadTexture(const string & fileName);
-        static void Draw(SDL_Texture* texture, SDL_Rect srcRect, SDL_Rect destRect, SDL_RendererFlip flip);
-        static void GetInfo(SDL_Texture * texture, int & w, int & h);
+namespace TextureManager {
+        SDL_Texture* LoadTexture(const string & fileName);
+        void Draw(SDL_Texture* texture, SDL_Rect srcRect, SDL_Rect destRect, SDL_RendererFlip flip);
+        void GetInfo(SDL_Texture * texture, int & w, int & h);
 };
 
 #endif

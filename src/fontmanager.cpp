@@ -7,5 +7,5 @@ TTF_Font* FontManager::LoadFont(string fileName, int fontSize) {
 }
 
 void FontManager::Draw(SDL_Texture *texture, SDL_Rect position) {
-    SDL_RenderCopy(Game::GetGame()->GetRenderer(), texture, NULL, &position);
+    SDL_RenderCopy(Game::GetGame().GetRenderer(), texture, NULL, &position);
 }

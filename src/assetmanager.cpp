@@ -4,7 +4,7 @@
 #include "fontmanager.h"
 #include "transformcomponent.h"
 
-AssetManager::AssetManager(EntityManager* manager): _manager(manager) {
+AssetManager::AssetManager() {
 
 }
 

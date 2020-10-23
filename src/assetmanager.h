@@ -14,7 +14,7 @@ using std::map;
 
 class AssetManager {
     public :
-        AssetManager(EntityManager* manager);
+        AssetManager();
         ~AssetManager();
         void ClearData();
         void AddTexture(string textureId, const string & filePath);
@@ -24,7 +24,6 @@ class AssetManager {
 
 
     private:
-        EntityManager* _manager;
         map<string, SDL_Texture*> _textures;
         map<std::string, TTF_Font*> _fonts;
 

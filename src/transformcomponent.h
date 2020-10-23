@@ -24,18 +24,21 @@ class TransformComponent: public Component {
         }
 
         void Update(float deltaTime) override {
-            _position.x += _velocity.x * deltaTime * Game::GetGame()->GetSpeedFactor();
-            _position.y += _velocity.y * deltaTime * Game::GetGame()->GetSpeedFactor();
+            _position.x += _velocity.x * deltaTime;
+            _position.y += _velocity.y * deltaTime;
         }
 
-        glm::vec2 & GetPosition()  {return(_position);}
-        glm::vec2 & GetVelocity()  {return(_velocity);}
-        int GetWidth() { return(_width);}
-        int GetHeight() { return(_height);}
-        float GetScale() { return(_scale);}
+        const glm::vec2 & GetPosition() const {return(_position);}
+        const glm::vec2 & GetVelocity() const {return(_velocity);}
+        int GetWidth() const { return(_width);}
+        int GetHeight() const { return(_height);}
+        float GetScale() const { return(_scale);}
 
+        void SetPosition(int x, int y) { _position = glm::vec2(x,y);}
+        void SetVelocity(int x, int y) { _velocity = glm::vec2(x,y);}
         void SetWidth(int w) { _width = w; }
         void SetHeight(int h) { _height = h; }
+
 
     private:
         glm::vec2 _position;

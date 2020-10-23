@@ -18,7 +18,6 @@ class Component {
             void SetOwner(Entity * owner) { _owner = owner; }
 
         private:
-    
             Entity * _owner;
             map<const std::type_info*, Component*> componentTypeMap;
 };

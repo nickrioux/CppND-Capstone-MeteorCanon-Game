@@ -14,14 +14,13 @@ class BulletEmitterComponent: public Component {
         void Init() override {
             _transform = GetOwner()->GetComponent<TransformComponent>();
             _origin = glm::vec2(_transform->GetPosition().x, _transform->GetPosition().y);
-            _transform->GetVelocity() = glm::vec2(glm::cos(_angleRad) * _speed, glm::sin(_angleRad) * _speed); 
+            _transform->SetVelocity(glm::cos(_angleRad) * _speed, glm::sin(_angleRad) * _speed); 
         }
 
         void Update(float deltaTime) override {
             if (glm::distance(_transform->GetPosition(), _origin) > _range) {
                 if (_loop) {
-                    _transform->GetPosition().x = _origin.x;
-                    _transform->GetPosition().y = _origin.y;
+                    _transform->SetPosition(_origin.x, _origin.y);
                 } else {
                     GetOwner()->Destroy();
                 }

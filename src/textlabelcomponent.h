@@ -21,8 +21,8 @@ class TextLabelComponent: public Component {
         }
 
         void SetLabelText(string text, std::string fontFamily) {
-            SDL_Surface* surface = TTF_RenderText_Blended(Game::GetGame()->GetAssetManager()->GetFont(fontFamily), text.c_str(), _color);
-            _texture = SDL_CreateTextureFromSurface(Game::GetGame()->GetRenderer(), surface);
+            SDL_Surface* surface = TTF_RenderText_Blended(Game::GetGame().GetAssetManager().GetFont(fontFamily), text.c_str(), _color);
+            _texture = SDL_CreateTextureFromSurface(Game::GetGame().GetRenderer(), surface);
             SDL_FreeSurface(surface);
             SDL_QueryTexture(_texture, NULL, NULL, &_position.w, &_position.h);
         }
