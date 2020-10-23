@@ -7,14 +7,13 @@ int main() {
   constexpr std::size_t kScreenWidth{1024};
   constexpr std::size_t kScreenHeight{768};
 
-  Game *game = Game::GetGame();
 
-  game->Init(kScreenWidth, kScreenHeight);
+  Game::GetGame().Init(kScreenWidth, kScreenHeight);
 
-  game->Run(kMsPerFrame);
+  Game::GetGame().Run(kMsPerFrame);
 
   std::cout << "Game has terminated successfully!\n";
-  std::cout << "Score: " << game->GetScore() << "\n";
+  std::cout << "Score: " << Game::GetGame().GetScore() << "\n";
   
   return 0;
 }

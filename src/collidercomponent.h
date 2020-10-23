@@ -31,8 +31,8 @@ class ColliderComponent : public Component {
                 _collider.y = static_cast<int>(_transform->GetPosition().y);
                 _collider.w = _transform->GetWidth() * _transform->GetScale();
                 _collider.h = _transform->GetHeight() * _transform->GetScale();
-                _destRect.x = _collider.x - Game::GetGame()->GetCamera()->x;
-                _destRect.y = _collider.y - Game::GetGame()->GetCamera()->y;
+                _destRect.x = _collider.x - Game::GetGame().GetCamera().x;
+                _destRect.y = _collider.y - Game::GetGame().GetCamera().y;
             }
 
             std::string GetColliderTag() const { return _colliderTag; }

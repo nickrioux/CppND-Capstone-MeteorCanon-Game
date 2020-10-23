@@ -21,7 +21,7 @@ class Entity {
         Entity(EntityManager& manager, std::string name, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
         ~Entity() {};
 
-        bool IsActive() const;
+        bool IsActive();
         void Update(float deltaTime);
         void Render();
         void Destroy();
@@ -30,6 +30,9 @@ class Entity {
         const string & GetName() const { return _name; } 
         const GameConstants::LayerType GetLayer() const { return _layerType; }
         const GameConstants::EntityType GetEntityType() const { return _entityType; }
+
+        const float GetLifeTime() const { return _lifeTime; }
+        void SetLifeTime(float lifeTime) { _lifeTime = lifeTime; }
 
         template <typename T, typename... TArgs>
         T& AddComponent(TArgs&&... args) {
@@ -59,6 +62,8 @@ class Entity {
         GameConstants::LayerType _layerType;
         std::map<const std::type_info*, Component*> _componentTypeMap;
         bool _isActive;
+        float _lifeTime{GameConstants::ENTITY_LIFE_INFINITE};
+        int _timeCreation{0};
 
 };
 

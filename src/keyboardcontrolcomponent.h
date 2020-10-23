@@ -41,39 +41,30 @@ class KeyboardControlComponent : public Component {
         }
 
         void Update(float deltaTime) override {
-            if (Game::GetGame()->GetEvent()->type == SDL_KEYDOWN) {
-                std::string keyCode = std::to_string(Game::GetGame()->GetEvent()->key.keysym.sym);
+            if (Game::GetGame().GetEvent().type == SDL_KEYDOWN) {
+                std::string keyCode = std::to_string(Game::GetGame().GetEvent().key.keysym.sym);
 
                 if (keyCode.compare(_leftKey) == 0) {
-                    _transform->GetVelocity().x = -100;
-                    _transform->GetVelocity().y = 0;
+                    _transform->SetVelocity(-GameConstants::PLAYER_SPEED,0);
                 }
 
                 if (keyCode.compare(_rightKey) == 0) {
-                    _transform->GetVelocity().x = 100;
-                    _transform->GetVelocity().y = 0;
+                    _transform->SetVelocity(GameConstants::PLAYER_SPEED,0);
                 }
                 
                 if (keyCode.compare(_shootKey) == 0) {
-                    Entity & bulletEntity = Game::GetGame()->GetEntityManager()->AddEntity("bullet",GameConstants::BULLET_ENTITY,GameConstants::BULLET_LAYER);
-                    bulletEntity.AddComponent<TransformComponent>(_transform->GetPosition().x+13,_transform->GetPosition().y-40, 0, 0, 0, 0, 1.0);
-                    bulletEntity.AddComponent<SpriteComponent>("bullet");
-                    bulletEntity.AddComponent<ColliderComponent>("BULLET",_transform->GetPosition().x+13,_transform->GetPosition().y-40,_transform->GetWidth(),_transform->GetHeight());
-                    bulletEntity.AddComponent<BulletEmitterComponent>(200,270,Game::GetGame()->GetHeight()-40,false);
+                    Game::GetGame().GenerateBullet(*_transform);
                 }
             }
 
-            if (Game::GetGame()->GetEvent()->type == SDL_KEYUP) {
-                std::string keyCode = std::to_string(Game::GetGame()->GetEvent()->key.keysym.sym);
+            if (Game::GetGame().GetEvent().type == SDL_KEYUP) {
+                std::string keyCode = std::to_string(Game::GetGame().GetEvent().key.keysym.sym);
 
                 if (keyCode.compare(_leftKey) == 0) {
-                    _transform->GetVelocity().x = 0;
-                    _transform->GetVelocity().y = 0;
-                }
+                    _transform->SetVelocity(0,0);                }
 
                 if (keyCode.compare(_rightKey) == 0) {
-                    _transform->GetVelocity().x = 0;
-                    _transform->GetVelocity().y = 0;
+                    _transform->SetVelocity(0,0);
                 }
             }
         }

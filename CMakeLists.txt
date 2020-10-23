@@ -20,7 +20,7 @@ add_executable( Astromash
                 src/tilecomponent.cpp 
                 src/map.cpp 
                 src/main.cpp 
-                src/game.cpp 
+                src/game.cpp
                 src/fontmanager.cpp
                 src/texturemanager.cpp 
                 src/assetmanager.cpp 

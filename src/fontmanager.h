@@ -8,11 +8,10 @@
 
 using std::string;
 
-class FontManager {
-    public:
-
-        static TTF_Font* LoadFont(string fileName, int fontSize);
-        static void Draw(SDL_Texture* texture, SDL_Rect position); 
+namespace FontManager {
+    
+        TTF_Font* LoadFont(string fileName, int fontSize);
+        void Draw(SDL_Texture* texture, SDL_Rect position); 
 };
 
 #endif

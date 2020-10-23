@@ -14,7 +14,7 @@
 class TileComponent : public Component {
     public :
         TileComponent(int srcRectX, int srcRectY, int x, int y, int tileSize, int tileScale, string textureId) {
-            _texture = Game::GetGame()->GetAssetManager()->GetTexture(textureId);
+            _texture = Game::GetGame().GetAssetManager().GetTexture(textureId);
             _srcRect.x = srcRectX;
             _srcRect.y = srcRectY;
             _srcRect.w = tileSize;
@@ -34,8 +34,8 @@ class TileComponent : public Component {
         }
 
         void Update(float deltaTime) override {
-            _destRect.x = _position.x - Game::GetGame()->GetCamera()->x;
-            _destRect.y = _position.y - Game::GetGame()->GetCamera()->y;
+            _destRect.x = _position.x - Game::GetGame().GetCamera().x;
+            _destRect.y = _position.y - Game::GetGame().GetCamera().y;
         }
 
         void Render() override {

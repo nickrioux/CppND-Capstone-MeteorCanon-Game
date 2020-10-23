@@ -16,6 +16,8 @@ class Map {
         string _textureId;
         int _scale;
         int _tileSize;
+
+        void destroy();
 };
 
 #endif

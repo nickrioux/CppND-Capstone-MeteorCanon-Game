@@ -68,20 +68,28 @@ vector<EntityManager::CollisionData> EntityManager::CheckCollisions() const {
                             collisionData.collisionType = GameConstants::PLAYER_RIGHT_BOUNDARY_COLLISION;
                             collisions.emplace_back(collisionData);
                         }
+                        if (thisCollider->GetColliderTag().compare("SPINNER") == 0 && thatCollider->GetColliderTag().compare("BULLET") ==0) {
+                            collisionData.collisionType = GameConstants::ENEMY_BULLET_COLLISION;
+                            collisions.emplace_back(collisionData);
+                        }
                         if (thisCollider->GetColliderTag().compare("PLAYER") == 0 && thatCollider->GetColliderTag().compare("SPINNER") == 0) {
                             collisionData.collisionType = GameConstants::PLAYER_SPINNER_COLLISION;
+                            collisions.emplace_back(collisionData);
+                        }
+                        if (thisCollider->GetColliderTag().compare("SPINNER") == 0 && thatCollider->GetColliderTag().compare("GROUND") == 0) {
+                            collisionData.collisionType = GameConstants::SPINNER_GROUND_COLLISION;
                             collisions.emplace_back(collisionData);
                         }
                         if (thisCollider->GetColliderTag().compare("METEOR") == 0 && thatCollider->GetColliderTag().compare("GROUND") == 0) {
                             collisionData.collisionType = GameConstants::METEOR_GROUND_COLLISION;
                             collisions.emplace_back(collisionData);
                         }
-                        if (thisCollider->GetColliderTag().compare("METEOR") == 0 && thatCollider->GetColliderTag().compare("LEFT_BOUNDARY") == 0) {
-                            collisionData.collisionType = GameConstants::METEOR_BOUNDARY_COLLISION;
+                        if (thatCollider->GetColliderTag().compare("LEFT_BOUNDARY") == 0) {
+                            collisionData.collisionType = GameConstants::FALLING_OBJECT_BOUNDARY_COLLISION;
                             collisions.emplace_back(collisionData);
                         }
-                        if (thisCollider->GetColliderTag().compare("METEOR") == 0 && thatCollider->GetColliderTag().compare("RIGHT_BOUNDARY") == 0) {
-                            collisionData.collisionType = GameConstants::METEOR_BOUNDARY_COLLISION;
+                        if (thatCollider->GetColliderTag().compare("RIGHT_BOUNDARY") == 0) {
+                            collisionData.collisionType = GameConstants::FALLING_OBJECT_BOUNDARY_COLLISION;
                             collisions.emplace_back(collisionData);
                         }
                     }
