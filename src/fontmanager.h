@@ -1,6 +1,7 @@
 #ifndef FONTMANAGER_H
 #define FONTMANAGER_H
 
+#include <memory>
 #include <string>
 
 #include <SDL.h>
