@@ -19,13 +19,13 @@ class AssetManager {
         void ClearData();
         void AddTexture(string textureId, const string & filePath);
         void AddFont(std::string fontId, const string & filePath, int fontSize);        
-        SDL_Texture* GetTexture(std::string textureId);
-        TTF_Font* GetFont(std::string fontId);
+        std::shared_ptr<SDL_Texture> GetTexture(std::string textureId);
+        std::shared_ptr<TTF_Font> GetFont(std::string fontId);
 
 
     private:
-        map<string, SDL_Texture*> _textures;
-        map<std::string, TTF_Font*> _fonts;
+        map<string, std::shared_ptr<SDL_Texture>> _textures;
+        map<std::string, std::shared_ptr<TTF_Font>> _fonts;
 
 };
 

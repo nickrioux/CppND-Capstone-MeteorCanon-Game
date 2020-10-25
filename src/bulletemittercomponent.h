@@ -7,28 +7,14 @@
 
 class BulletEmitterComponent: public Component {
     public:
-        BulletEmitterComponent(int speed, int angleDeg, int range, bool loop) : _speed(speed), _range(range), _loop(loop) {
-            _angleRad = glm::radians(static_cast<float>(angleDeg));
-        }
+        BulletEmitterComponent(int speed, int angleDeg, int range, bool loop);
 
-        void Init() override {
-            _transform = GetOwner()->GetComponent<TransformComponent>();
-            _origin = glm::vec2(_transform->GetPosition().x, _transform->GetPosition().y);
-            _transform->SetVelocity(glm::cos(_angleRad) * _speed, glm::sin(_angleRad) * _speed); 
-        }
+        void Init() override;
 
-        void Update(float deltaTime) override {
-            if (glm::distance(_transform->GetPosition(), _origin) > _range) {
-                if (_loop) {
-                    _transform->SetPosition(_origin.x, _origin.y);
-                } else {
-                    GetOwner()->Destroy();
-                }
-            } 
-        }
+        void Update(float deltaTime) override;
 
     private:
-        TransformComponent *_transform;
+        std::shared_ptr<TransformComponent> _transform;
         glm::vec2 _origin;
         int _speed;
         int _range;

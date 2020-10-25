@@ -10,8 +10,8 @@ using std::string;
 
 namespace FontManager {
     
-        TTF_Font* LoadFont(string fileName, int fontSize);
-        void Draw(SDL_Texture* texture, SDL_Rect position); 
+        std::shared_ptr<TTF_Font> LoadFont(const string & fileName, int fontSize);
+        void Draw(std::shared_ptr<SDL_Texture> texture, SDL_Rect position); 
 };
 
 #endif
