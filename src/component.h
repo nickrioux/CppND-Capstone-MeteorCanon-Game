@@ -14,12 +14,11 @@ class Component {
             virtual void Render() {};
             virtual void Init() {};
 
-            Entity * GetOwner() { return(_owner); }
-            void SetOwner(Entity * owner) { _owner = owner; }
+            std::shared_ptr<Entity> GetOwner() { return(_owner); }
+            void SetOwner(std::shared_ptr<Entity>  owner) { _owner = owner; }
 
         private:
-            Entity * _owner;
-            map<const std::type_info*, Component*> componentTypeMap;
+            std::shared_ptr<Entity> _owner;
 };
 
 #endif

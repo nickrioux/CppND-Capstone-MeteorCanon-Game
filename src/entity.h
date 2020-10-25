@@ -14,11 +14,11 @@ using std::string;
 class EntityManager;
 class Component;
 
-class Entity {
+class Entity : public std::enable_shared_from_this<Entity> {
     
     public :
         Entity(EntityManager& manager);
-        Entity(EntityManager& manager, std::string name, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
+        Entity(EntityManager& manager, const string & name, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
         ~Entity() {};
 
         bool IsActive();
@@ -36,8 +36,8 @@ class Entity {
 
         template <typename T, typename... TArgs>
         T& AddComponent(TArgs&&... args) {
-            T* newComponent(new T(std::forward<TArgs>(args)...));
-            newComponent->SetOwner(this);
+            std::shared_ptr<T> newComponent(std::make_shared<T>(T(std::forward<TArgs>(args)...)));
+            newComponent->SetOwner(shared_from_this());
             _components.emplace_back(newComponent);
             _componentTypeMap[&typeid(*newComponent)] = newComponent;
             newComponent->Init();
@@ -50,21 +50,20 @@ class Entity {
         }
 
         template <typename T>
-        T* GetComponent() {
-            return static_cast<T*>(_componentTypeMap[&typeid(T)]);
+        std::shared_ptr<T> GetComponent() {
+            return (std::static_pointer_cast<T>(_componentTypeMap[&typeid(T)]));
         }
 
     private:
         string _name;
         GameConstants::EntityType _entityType;
         EntityManager & _manager;
-        vector<Component *> _components;
+        vector<std::shared_ptr<Component>> _components;
         GameConstants::LayerType _layerType;
-        std::map<const std::type_info*, Component*> _componentTypeMap;
+        std::map<const std::type_info*, std::shared_ptr<Component> > _componentTypeMap;
         bool _isActive;
         float _lifeTime{GameConstants::ENTITY_LIFE_INFINITE};
         int _timeCreation{0};
-
 };
 
 #endif

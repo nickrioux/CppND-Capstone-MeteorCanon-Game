@@ -70,7 +70,7 @@ namespace GameConstants {
      };
 
      enum Speed {
-          PLAYER_SPEED = 150,
+          PLAYER_SPEED = 300,
           BULLET_SPEED = 350,
           METEOR_SPEED = 100,
           UFO_SPEED = 100,

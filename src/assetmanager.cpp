@@ -24,10 +24,10 @@ void AssetManager::AddFont(std::string fontId, const std::string & filePath, int
     _fonts.emplace(fontId, FontManager::LoadFont(filePath.c_str(), fontSize));
 }
 
-SDL_Texture* AssetManager::GetTexture(std::string textureId) {
+std::shared_ptr<SDL_Texture> AssetManager::GetTexture(std::string textureId) {
     return _textures[textureId];
 }
 
-TTF_Font* AssetManager::GetFont(std::string fontId) {
+std::shared_ptr<TTF_Font> AssetManager::GetFont(std::string fontId) {
     return _fonts[fontId];
 }

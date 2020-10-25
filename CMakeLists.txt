@@ -5,7 +5,7 @@ add_definitions(-std=c++17)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
-project(CppND-Capstone-Astromash)
+project(CppND-Capstone-MeteorCanon-Game)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -14,7 +14,7 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 include_directories(PRIVATE ${SDL2_image_INCLUDE_DIRS} ${SDL2_tff_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} src lib)
 
-add_executable( Astromash 
+add_executable( MeteorCanon 
                 src/spritecomponent.cpp 
                 src/keyboardcontrolcomponent.cpp 
                 src/tilecomponent.cpp 
@@ -33,4 +33,4 @@ add_executable( Astromash
                 src/textlabelcomponent.cpp
                 src/bulletemittercomponent.cpp)
 
-target_link_libraries(Astromash SDL2::Core SDL2::Image SDL2::TTF)
+target_link_libraries(MeteorCanon SDL2::Core SDL2::Image SDL2::TTF)

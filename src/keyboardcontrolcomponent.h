@@ -19,9 +19,9 @@ class KeyboardControlComponent : public Component {
 
         }
 
-        KeyboardControlComponent(std::string leftKey, 
-                                std::string rightKey, 
-                                std::string shootKey) {
+        KeyboardControlComponent(const std::string leftKey, 
+                                const std::string rightKey, 
+                                const std::string shootKey) {
             _leftKey = GetSDLKeyStringCode(leftKey);
             _rightKey = GetSDLKeyStringCode(rightKey);
             _shootKey = GetSDLKeyStringCode(shootKey);
@@ -74,8 +74,8 @@ class KeyboardControlComponent : public Component {
         std::string _leftKey;
         std::string _rightKey;
         std::string _shootKey;
-        TransformComponent * _transform;
-        SpriteComponent * _sprite;
+        std::shared_ptr<TransformComponent> _transform;
+        std::shared_ptr<SpriteComponent> _sprite;
 };
 
 #endif

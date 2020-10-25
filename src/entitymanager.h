@@ -1,21 +1,23 @@
 #ifndef ENTITYMANAGER_H
 #define ENTITYMANAGER_H
 
+#include <vector>
+
 #include "gameconstants.h"
 #include "entity.h"
 #include "component.h"
-#include <vector>
 
 using std::vector;
 
+class ColliderComponent;
 class EntityManager {
        
     public:
         
         struct CollisionData {
             GameConstants::CollisionType collisionType;
-            Entity * entityOne;
-            Entity * entityTwo;
+            std::shared_ptr<Entity> entityOne;
+            std::shared_ptr<Entity> entityTwo;
         };
 
         void ClearData();
@@ -23,17 +25,17 @@ class EntityManager {
         void Render();
         vector<EntityManager::CollisionData> CheckCollisions() const;
         bool HasNoEntities();
-        Entity& AddEntity(std::string entityName, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
-        std::vector<Entity*> GetEntities() const;
-        std::vector<Entity*> GetEntitiesByLayer(GameConstants::LayerType layerType) const;
+        std::shared_ptr<Entity> AddEntity(std::string entityName, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
+        vector<std::shared_ptr<Entity>> GetEntities() const;
+        vector<std::shared_ptr<Entity>> GetEntitiesByLayer(GameConstants::LayerType layerType) const;
         unsigned int GetEntityCount();
         void ListAllEntities() const;
 
     private:
-        vector<Entity*> _entities; 
+        vector<std::shared_ptr<Entity>> _entities; 
 
         void destroyInactiveEntities();
-
+        bool validateCollision(const std::shared_ptr<ColliderComponent> &, const std::shared_ptr<ColliderComponent> &, const string &, const string &) const;
 };
 
 #endif

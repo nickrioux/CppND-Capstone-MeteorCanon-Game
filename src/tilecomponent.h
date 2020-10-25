@@ -30,8 +30,10 @@ class TileComponent : public Component {
         }
 
         ~TileComponent() {
-            SDL_DestroyTexture(_texture);
+            //SDL_DestroyTexture(_texture);
         }
+
+        void Init() override {};
 
         void Update(float deltaTime) override {
             _destRect.x = _position.x - Game::GetGame().GetCamera().x;
@@ -43,7 +45,7 @@ class TileComponent : public Component {
         }
 
     private:
-        SDL_Texture * _texture;
+        std::shared_ptr<SDL_Texture> _texture;
         SDL_Rect _srcRect;
         SDL_Rect _destRect;
         glm::vec2 _position;

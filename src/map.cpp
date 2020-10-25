@@ -37,12 +37,12 @@ void Map::LoadMap(string filePath, int mapSizeX, int mapSizeY) {
 }
 
 void Map::AddTile(int srcRectX, int srxRectY, int x, int y) {
-    Entity & newTile(Game::GetGame().GetEntityManager().AddEntity("Tile",GameConstants::TILE_ENTITY,GameConstants::BACKGROUND_LAYER));
-    newTile.AddComponent<TileComponent>(srcRectX, srxRectY, x, y, _tileSize,_scale, _textureId);
+    std::shared_ptr<Entity> newTile(Game::GetGame().GetEntityManager().AddEntity("Tile",GameConstants::TILE_ENTITY,GameConstants::BACKGROUND_LAYER));
+    newTile->AddComponent<TileComponent>(srcRectX, srxRectY, x, y, _tileSize,_scale, _textureId);
 }
 
 void Map::destroy() {
-        vector<Entity *> currentMap = Game::GetGame().GetEntityManager().GetEntitiesByLayer(GameConstants::BACKGROUND_LAYER);
+        vector<std::shared_ptr<Entity>> currentMap = Game::GetGame().GetEntityManager().GetEntitiesByLayer(GameConstants::BACKGROUND_LAYER);
 
         std::cout << "MAP DESTROYED\n";
 

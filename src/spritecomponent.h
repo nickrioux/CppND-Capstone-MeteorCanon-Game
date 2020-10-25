@@ -13,16 +13,11 @@ using std::string;
 
 class SpriteComponent: public Component {
     public:
-        SpriteComponent(const string & filePath, bool isFixed = false) : _transform(nullptr), _isFixed(isFixed) {
+        SpriteComponent(const string & filePath, bool isFixed = false) : _transform(nullptr), _isFixed(isFixed), _animationSpeed(0), _isAnimated(false), _numFrames(0) {
             SetTexture(filePath);
         }
 
-        SpriteComponent(std::string id, int numFrames, int animationSpeed, bool isFixed = false) {
-            _isAnimated = true;
-            _numFrames = numFrames;
-            _animationSpeed = animationSpeed;
-            _isFixed = isFixed;
-
+        SpriteComponent(std::string id, int numFrames, int animationSpeed, bool isFixed = false) : _isAnimated(true), _numFrames(numFrames), _animationSpeed(animationSpeed), _isFixed(isFixed) {
             SetTexture(id);
         }
 
@@ -64,8 +59,8 @@ class SpriteComponent: public Component {
         private:
             bool _isFixed{false};
             SDL_RendererFlip _spriteFlip = SDL_FLIP_NONE;
-            TransformComponent * _transform;
-            SDL_Texture* _texture;
+            std::shared_ptr<TransformComponent> _transform;
+            std::shared_ptr<SDL_Texture> _texture;
             SDL_Rect _sourceRectangle;
             SDL_Rect _destinationRectangle;
 
