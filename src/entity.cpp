@@ -32,7 +32,7 @@ void Entity::Destroy() {
 }
 
 bool Entity::IsActive() {
-    if (GetLifeTime() == GameConstants::ENTITY_LIFE_INFINITE) {
+    if (GetLifeTime() == GameConstants::kEntityLifeInfinite) {
         return _isActive;
     }
     else

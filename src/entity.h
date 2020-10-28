@@ -62,7 +62,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
         GameConstants::LayerType _layerType;
         std::map<const std::type_info*, std::shared_ptr<Component> > _componentTypeMap;
         bool _isActive;
-        float _lifeTime{GameConstants::ENTITY_LIFE_INFINITE};
+        float _lifeTime{GameConstants::kEntityLifeInfinite};
         int _timeCreation{0};
 };
 

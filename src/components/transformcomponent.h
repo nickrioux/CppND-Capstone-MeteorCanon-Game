@@ -11,22 +11,9 @@
 
 class TransformComponent: public Component {
     public:
+        TransformComponent(int posX, int posY, int velX, int velY, int w, int h, float s);
 
-
-        TransformComponent(int posX, int posY, int velX, int velY, int w, int h, float s) : _position(glm::vec2(posX,posY)), _velocity(glm::vec2(velX,velY)) {
-            _width = w;
-            _height = h;
-            _scale = s;
-        }
-
-        void Init() override {
-        
-        }
-
-        void Update(float deltaTime) override {
-            _position.x += _velocity.x * deltaTime;
-            _position.y += _velocity.y * deltaTime;
-        }
+        void Update(float deltaTime) override;
 
         const glm::vec2 & GetPosition() const {return(_position);}
         const glm::vec2 & GetVelocity() const {return(_velocity);}
@@ -38,7 +25,6 @@ class TransformComponent: public Component {
         void SetVelocity(int x, int y) { _velocity = glm::vec2(x,y);}
         void SetWidth(int w) { _width = w; }
         void SetHeight(int h) { _height = h; }
-
 
     private:
         glm::vec2 _position;

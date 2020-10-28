@@ -1,16 +1,11 @@
 #include <iostream>
+#include "gameconstants.h"
 #include "game.h"
 
 int main() {
-  constexpr std::size_t kFramesPerSecond{60};
-  constexpr std::size_t kMsPerFrame{1000 / kFramesPerSecond};
-  constexpr std::size_t kScreenWidth{1024};
-  constexpr std::size_t kScreenHeight{768};
+  Game::GetGame().Init(GameConstants::kScreenWidth, GameConstants::kScreenHeight);
 
-
-  Game::GetGame().Init(kScreenWidth, kScreenHeight);
-
-  Game::GetGame().Run(kMsPerFrame);
+  Game::GetGame().Run(GameConstants::kMsPerFrame);
 
   std::cout << "Game has terminated successfully!\n";
   std::cout << "Score: " << Game::GetGame().GetScore() << "\n";

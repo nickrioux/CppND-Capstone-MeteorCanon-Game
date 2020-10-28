@@ -35,7 +35,7 @@ class EntityManager {
         vector<std::shared_ptr<Entity>> _entities; 
 
         void destroyInactiveEntities();
-        bool validateCollision(const std::shared_ptr<ColliderComponent> &, const std::shared_ptr<ColliderComponent> &, const string &, const string &) const;
+        bool validateCollision(const std::shared_ptr<ColliderComponent> &, const std::shared_ptr<ColliderComponent> &, const GameConstants::ColliderTag &, const GameConstants::ColliderTag  &) const;
 };
 
 #endif

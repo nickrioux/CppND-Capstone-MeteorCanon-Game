@@ -1,7 +1,6 @@
 #include "collidercomponent.h"
 
-ColliderComponent::ColliderComponent(const std::string & colliderTag, int x, int y, int width, int height) : _colliderTag(colliderTag), _collider({x,y,width,height}) {
-    //_collider = {x, y, width, height};
+ColliderComponent::ColliderComponent(const GameConstants::ColliderTag & colliderTag, int x, int y, int width, int height) : _colliderTag(colliderTag), _collider({x,y,width,height}) {
 }
 
 void ColliderComponent::Init() {

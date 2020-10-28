@@ -4,10 +4,10 @@
 #include "game.h"
 #include "entitymanager.h"
 #include "entity.h"
-#include "tilecomponent.h"
+#include "components/tilecomponent.h"
 #include "map.h"
 
-Map::Map(string textureId, int scale, int tileSize) : _textureId(textureId), _scale(scale), _tileSize(tileSize) {
+Map::Map(const string & textureId, int scale, int tileSize) : _textureId(textureId), _scale(scale), _tileSize(tileSize) {
 
 };
 
@@ -15,7 +15,7 @@ Map::~Map() {
         destroy();
 }
 
-void Map::LoadMap(string filePath, int mapSizeX, int mapSizeY) {
+void Map::LoadMap(const string & filePath, int mapSizeX, int mapSizeY) {
     
     std::fstream mapFile;
     mapFile.open(filePath);
@@ -37,15 +37,12 @@ void Map::LoadMap(string filePath, int mapSizeX, int mapSizeY) {
 }
 
 void Map::AddTile(int srcRectX, int srxRectY, int x, int y) {
-    std::shared_ptr<Entity> newTile(Game::GetGame().GetEntityManager().AddEntity("Tile",GameConstants::TILE_ENTITY,GameConstants::BACKGROUND_LAYER));
+    std::shared_ptr<Entity> newTile(Game::GetGame().GetEntityManager().AddEntity("Tile",GameConstants::TileEntity,GameConstants::BackgroundLayer));
     newTile->AddComponent<TileComponent>(srcRectX, srxRectY, x, y, _tileSize,_scale, _textureId);
 }
 
 void Map::destroy() {
-        vector<std::shared_ptr<Entity>> currentMap = Game::GetGame().GetEntityManager().GetEntitiesByLayer(GameConstants::BACKGROUND_LAYER);
-
-        std::cout << "MAP DESTROYED\n";
-
+        vector<std::shared_ptr<Entity>> currentMap = Game::GetGame().GetEntityManager().GetEntitiesByLayer(GameConstants::BackgroundLayer);
         for (auto & entity : currentMap) {
                 entity->Destroy();
         }

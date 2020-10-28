@@ -4,7 +4,7 @@
 #include "game.h"
 #include "entity.h"
 #include "collision.h"
-#include "collidercomponent.h"
+#include "components/collidercomponent.h"
 #include "entitymanager.h"
 
 void EntityManager::ClearData() {
@@ -24,7 +24,7 @@ void EntityManager::Update(float deltaTime) {
 void EntityManager::Render() {
     //TODO - Final Solution (Sort Entity by Layer when adding a new Entity)
 
-    for (int layerNumber = 0; layerNumber < GameConstants::NUM_LAYERS; ++layerNumber) {
+    for (int layerNumber = 0; layerNumber < GameConstants::kNumLayers; ++layerNumber) {
         for (auto & entity : GetEntitiesByLayer(static_cast<GameConstants::LayerType>(layerNumber))) {
                 entity->Render();
         }
@@ -48,52 +48,52 @@ vector<EntityManager::CollisionData> EntityManager::CheckCollisions() const {
                         collisionData.entityOne = thisEntity;
                         collisionData.entityTwo = thatEntity;
 
-                        if (validateCollision(thisCollider,thatCollider,"PLAYER","METEOR")) {
-                            collisionData.collisionType = GameConstants::PLAYER_METEOR_COLLISION;
+                        if (validateCollision(thisCollider,thatCollider,GameConstants::PlayerTag,GameConstants::MeteorTag)) {
+                            collisionData.collisionType = GameConstants::CollisionType::PlayerMeteor;
                             collisions.emplace_back(collisionData);
                         }
 
-                        if (validateCollision(thisCollider,thatCollider,"METEOR","BULLET")) {
-                            collisionData.collisionType = GameConstants::ENEMY_BULLET_COLLISION;
+                        if (validateCollision(thisCollider,thatCollider,GameConstants::MeteorTag,GameConstants::BulletTag)) {
+                            collisionData.collisionType = GameConstants::CollisionType::EnemyBullet;
                             collisions.emplace_back(collisionData);
                         }
 
-                        if (validateCollision(thisCollider,thatCollider,"PLAYER","LEFT_BOUDARY")) {
-                            collisionData.collisionType = GameConstants::PLAYER_LEFT_BOUNDARY_COLLISION;
+                        if (validateCollision(thisCollider,thatCollider,GameConstants::PlayerTag,GameConstants::LeftBoundaryTag)) {
+                            collisionData.collisionType = GameConstants::CollisionType::PlayerLeftBoundary;
                             collisions.emplace_back(collisionData);
                         }
 
-                        if (validateCollision(thisCollider,thatCollider,"PLAYER","RIGHT_BOUNDARY")) {
-                            collisionData.collisionType = GameConstants::PLAYER_RIGHT_BOUNDARY_COLLISION;
+                        if (validateCollision(thisCollider,thatCollider,GameConstants::PlayerTag,GameConstants::RightBoundaryTag)) {
+                            collisionData.collisionType = GameConstants::CollisionType::PlayerRightBoundary;
                             collisions.emplace_back(collisionData);
                         }
 
-                        if (validateCollision(thisCollider,thatCollider,"SPINNER","BULLET")) {
-                            collisionData.collisionType = GameConstants::ENEMY_BULLET_COLLISION;
+                        if (validateCollision(thisCollider,thatCollider,GameConstants::SpinnerTag,GameConstants::BulletTag)) {
+                            collisionData.collisionType = GameConstants::CollisionType::EnemyBullet;
                             collisions.emplace_back(collisionData);
                         }
 
-                        if (validateCollision(thisCollider,thatCollider,"PLAYER","SPINNER")) {
-                            collisionData.collisionType = GameConstants::PLAYER_SPINNER_COLLISION;
+                        if (validateCollision(thisCollider,thatCollider,GameConstants::PlayerTag,GameConstants::SpinnerTag)) {
+                            collisionData.collisionType = GameConstants::CollisionType::PlayerSpinner;
                             collisions.emplace_back(collisionData);
                         }
 
-                        if (validateCollision(thisCollider,thatCollider,"SPINNER","GROUND")) {
-                            collisionData.collisionType = GameConstants::SPINNER_GROUND_COLLISION;
+                        if (validateCollision(thisCollider,thatCollider,GameConstants::SpinnerTag,GameConstants::GroundTag)) {
+                            collisionData.collisionType = GameConstants::CollisionType::SpinnerGround;
                             collisions.emplace_back(collisionData);
                         }
 
-                        if  (validateCollision(thisCollider,thatCollider,"METEOR","GROUND")) {
+                        if  (validateCollision(thisCollider,thatCollider,GameConstants::MeteorTag,GameConstants::GroundTag)) {
 
-                            collisionData.collisionType = GameConstants::METEOR_GROUND_COLLISION;
+                            collisionData.collisionType = GameConstants::CollisionType::MeteorGround;
                             collisions.emplace_back(collisionData);
                         }
 
-                        if (validateCollision(thisCollider,thatCollider,"METEOR","LEFT_BOUNDARY") ||
-                            validateCollision(thisCollider,thatCollider,"METEOR","RIGHT_BOUNDARY") ||
-                            validateCollision(thisCollider,thatCollider,"SPINNER","LEFT_BOUNDARY") ||
-                            validateCollision(thisCollider,thatCollider,"SPINNER","RIGHT_BOUNDARY")) {
-                            collisionData.collisionType = GameConstants::FALLING_OBJECT_BOUNDARY_COLLISION;
+                        if (validateCollision(thisCollider,thatCollider,GameConstants::MeteorTag,GameConstants::LeftBoundaryTag) ||
+                            validateCollision(thisCollider,thatCollider,GameConstants::MeteorTag,GameConstants::RightBoundaryTag) ||
+                            validateCollision(thisCollider,thatCollider,GameConstants::SpinnerTag,GameConstants::LeftBoundaryTag) ||
+                            validateCollision(thisCollider,thatCollider,GameConstants::SpinnerTag,GameConstants::RightBoundaryTag)) {
+                            collisionData.collisionType = GameConstants::CollisionType::FallingObjectBoundary;
                             collisions.emplace_back(collisionData);
                         }
                     }
@@ -105,19 +105,21 @@ vector<EntityManager::CollisionData> EntityManager::CheckCollisions() const {
     return collisions;
 }
 
+
+
+bool EntityManager::HasNoEntities() {
+    return(_entities.size() == 0);
+}
+
 bool EntityManager::validateCollision(const std::shared_ptr<ColliderComponent> & colliderOne, const std::shared_ptr<ColliderComponent> & colliderTwo, 
-                                      const string & collOneName, const string & collTwoName) const {
-    if ((colliderOne->GetColliderTag().compare(collOneName) == 0 && colliderTwo->GetColliderTag().compare(collTwoName) == 0) ||
-        (colliderOne->GetColliderTag().compare(collTwoName) == 0 && colliderTwo->GetColliderTag().compare(collOneName) == 0)) {
+                                      const GameConstants::ColliderTag & collOneTag, const GameConstants::ColliderTag & collTwoTag) const {
+    if ((colliderOne->GetColliderTag() == collOneTag) && (colliderTwo->GetColliderTag() == collTwoTag) ||
+        (colliderOne->GetColliderTag() == collTwoTag) && (colliderTwo->GetColliderTag() == collOneTag)) {
             return true;
     }
     else {
         return false;
     } 
-}
-
-bool EntityManager::HasNoEntities() {
-    return(_entities.size() == 0);
 }
 
 void EntityManager::destroyInactiveEntities() {

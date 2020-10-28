@@ -2,7 +2,7 @@
 
 #include "texturemanager.h"
 #include "fontmanager.h"
-#include "transformcomponent.h"
+#include "components/transformcomponent.h"
 
 AssetManager::AssetManager() {
 

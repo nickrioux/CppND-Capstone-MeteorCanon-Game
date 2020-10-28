@@ -42,9 +42,11 @@ class Game {
      std::unique_ptr<SDL_Renderer,decltype(&SDL_DestroyRenderer)> _sdl_renderer;
      SDL_Rect _camera;
 
-     //Game Entities and Objects
+     //Game Entities Player and Map
      std::unique_ptr<Map> _map;
      std::shared_ptr<Entity> _player;
+
+     //UI Entities
      std::shared_ptr<Entity> _scoreLabel;
      std::shared_ptr<Entity> _levelLabel;
      std::shared_ptr<Entity> _lifeLabel;
@@ -59,8 +61,10 @@ class Game {
      float _speedFactor{1.0f};
      int _ticksLastFrame{0};
      int _ticksLastKill{0};
-     int _width;
-     int _height;
+     float _generateSpinnerTime{0.0f};
+     float _generateMeteorTime{0.0f};
+     int _width{0};
+     int _height{0};
      int _lifes{3};
      int _fallingObjects{0};
 
@@ -72,11 +76,7 @@ class Game {
      std::uniform_int_distribution<int> _random_degree_right;
      std::uniform_int_distribution<int> _random_speed;
      std::uniform_int_distribution<int> _random_meteor;
-
-
-    //Access Data Methods
-    const int getWidth() const { return(_width); }
-    const int getHeight() const { return(_height); }
+     std::uniform_int_distribution<int> _random;
 
     //Generic Game Function
     void init(int width, int height);
@@ -95,9 +95,7 @@ class Game {
      void adjustCanonPosition(GameConstants::CollisionType);
      void generateMeteor(float deltaTime);
      void generateSpinner(float deltaTime);
-     void generateExplosion(glm::vec2 pos, bool death = false);
-     void generateUFO();
-     void generateMissile();
+     void generateExplosion(glm::vec2 pos, const GameConstants::EntityType & entityType);
      void processMeteorExplode(std::shared_ptr<Entity> meteor);
      void killPlayer();
      void restartPlayer();

@@ -14,23 +14,23 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 include_directories(PRIVATE ${SDL2_image_INCLUDE_DIRS} ${SDL2_tff_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} src lib)
 
-add_executable( MeteorCanon 
-                src/spritecomponent.cpp 
-                src/keyboardcontrolcomponent.cpp 
-                src/tilecomponent.cpp 
-                src/map.cpp 
+add_executable( MeteorCanon  
                 src/main.cpp 
                 src/game.cpp
                 src/fontmanager.cpp
                 src/texturemanager.cpp 
-                src/assetmanager.cpp 
-                src/entity.cpp 
-                src/component.cpp 
-                src/transformcomponent.cpp 
-                src/entitymanager.cpp
-                src/collidercomponent.cpp 
+                src/assetmanager.cpp
                 src/collision.cpp
-                src/textlabelcomponent.cpp
-                src/bulletemittercomponent.cpp)
+                src/map.cpp 
+                src/entity.cpp 
+                src/entitymanager.cpp
+                src/component.cpp 
+                src/components/transformcomponent.cpp 
+                src/components/collidercomponent.cpp 
+                src/components/textlabelcomponent.cpp
+                src/components/spritecomponent.cpp 
+                src/components/keyboardcontrolcomponent.cpp 
+                src/components/tilecomponent.cpp
+                src/components/bulletemittercomponent.cpp)
 
 target_link_libraries(MeteorCanon SDL2::Core SDL2::Image SDL2::TTF)

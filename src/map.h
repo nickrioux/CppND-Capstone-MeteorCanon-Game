@@ -7,9 +7,9 @@ using std::string;
 
 class Map {
     public :
-        Map(string textureId, int scale, int tileSize);
+        Map(const string & textureId, int scale, int tileSize);
         ~Map();
-        void LoadMap(string filePath, int mapSizeX, int mapSizeY);
+        void LoadMap(const string & filePath, int mapSizeX, int mapSizeY);
         void AddTile(int srcX, int srxY, int x, int y);
 
     private:
