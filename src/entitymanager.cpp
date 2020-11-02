@@ -10,7 +10,7 @@
 
 EntityManager::~EntityManager() { 
     {
-        std::scoped_lock lck(_mtx);
+        std::unique_lock<std::mutex> lck = GetLock();
         _endCollisionsThread = true;
 
     }
