@@ -1,3 +1,5 @@
+#include "entity.h"
+
 #include "keyboardcontrolcomponent.h"
 
 KeyboardControlComponent::KeyboardControlComponent(const std::string & leftKey, 
@@ -32,7 +34,7 @@ void KeyboardControlComponent::Update(float deltaTime) {
         }
         
         if (keyCode.compare(_shootKey) == 0) {
-            Game::GetGame().GenerateBullet(*_transform);
+            Game::GetGame().BulletEvent();
         }
     }
 

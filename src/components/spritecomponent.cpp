@@ -1,3 +1,5 @@
+#include "entity.h"
+
 #include "spritecomponent.h"
 
 SpriteComponent::SpriteComponent(const string & filePath, bool isFixed) : _transform(nullptr), _isFixed(isFixed), _animationSpeed(0), _isAnimated(false), _numFrames(0) {

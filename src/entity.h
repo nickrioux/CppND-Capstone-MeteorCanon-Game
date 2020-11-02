@@ -6,12 +6,12 @@
 #include <string>
 #include <memory>
 
+#include "entitymanager.h"
 #include "gameconstants.h"
 
 using std::vector;
 using std::string;
 
-class EntityManager;
 class Component;
 
 class Entity : public std::enable_shared_from_this<Entity> {
@@ -36,6 +36,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
 
         template <typename T, typename... TArgs>
         T& AddComponent(TArgs&&... args) {
+            std::unique_lock<std::mutex> lock = _manager.GetLock();
             std::shared_ptr<T> newComponent(std::make_shared<T>(T(std::forward<TArgs>(args)...)));
             newComponent->SetOwner(shared_from_this());
             _components.emplace_back(newComponent);

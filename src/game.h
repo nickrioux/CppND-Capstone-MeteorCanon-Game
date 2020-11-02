@@ -31,7 +31,7 @@ class Game {
       const SDL_Event & GetEvent() { return(_event); }
 
       //Event Functions
-      void GenerateBullet(const TransformComponent &);
+      void BulletEvent();
 
 
  private:
@@ -54,6 +54,7 @@ class Game {
      std::shared_ptr<Entity> _gameOverLabel;
 
      //Game Variables and Status
+     bool _eventBullet{false};
      bool _runningStatus{true};
      int _score{0};
      int _maxScore{0};
@@ -93,6 +94,7 @@ class Game {
      void handleCameraMovement();
      void checkCollisions();
      void adjustCanonPosition(GameConstants::CollisionType);
+     void generateBullet();
      void generateMeteor(float deltaTime);
      void generateSpinner(float deltaTime);
      void generateExplosion(glm::vec2 pos, const GameConstants::EntityType & entityType);
