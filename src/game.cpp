@@ -183,7 +183,6 @@ void Game::processInput() {
 }
 
 void Game::update(std::size_t target_frame_duration ) {
-
     static int gameState = GameConstants::GameState::Running;
     
     // Wait until 16ms has ellapsed since the last frame
@@ -216,6 +215,9 @@ void Game::update(std::size_t target_frame_duration ) {
 
         //Update Lifes
         updateLife();
+
+        //Generate Bullet
+        generateBullet();
 
         //Generate Meteor
         generateMeteor(deltaTime);
@@ -254,6 +256,7 @@ void Game::update(std::size_t target_frame_duration ) {
 }
 
 void Game::updateLevel() {
+
     if (_score >= GameConstants::Level6) {  
         
         if (_currLevel !=6) {
@@ -343,17 +346,12 @@ void Game::handleCameraMovement() {
 
 void Game::checkCollisions() {
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-
-    vector<EntityManager::CollisionData> collisions =  GetEntityManager().CheckCollisions();
+    GetEntityManager().CheckCollisions();
     
-    auto t2 = std::chrono::high_resolution_clock::now();
-
-//TODO - Thread
-#if 0
-    std::cout << "Collision Time : " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microseconds" << std::endl; 
-#endif
-
+    vector<EntityManager::CollisionData> collisions;
+    
+    collisions =  GetEntityManager().GetCollisions();
+    
     if (collisions.size() > 0) {
 
         for (int i = 0; i < collisions.size(); ++i) {
@@ -530,6 +528,7 @@ void Game::processMeteorExplode (std::shared_ptr<Entity> meteor)
         //Retrieve the Sprite Number
         std::string smallRockSpriteName = "smallrock";
         smallRockSpriteName += meteor->GetName().back();
+        
         std::shared_ptr<Entity> smallRock1 = GetEntityManager().AddEntity(GameConstants::kSmallMeteorName,GameConstants::SmallMeteorEntity,GameConstants::NpcLayer);
         smallRock1->AddComponent<TransformComponent>(posSmall1.x,posSmall1.y,speed1.x,speed1.y,GameConstants::SmallMeteorSizeW,GameConstants::SmallMeteorSizeH,GameConstants::kScaleGame);
         smallRock1->AddComponent<SpriteComponent>(smallRockSpriteName);
@@ -539,7 +538,7 @@ void Game::processMeteorExplode (std::shared_ptr<Entity> meteor)
         smallRock2->AddComponent<TransformComponent>(posSmall2.x,posSmall2.y,speed2.x,speed2.y,GameConstants::SmallMeteorSizeW,GameConstants::SmallMeteorSizeH,GameConstants::kScaleGame);
         smallRock2->AddComponent<SpriteComponent>(smallRockSpriteName);
         smallRock2->AddComponent<ColliderComponent>(GameConstants::MeteorTag,posSmall2.x,posSmall2.y,GameConstants::SmallMeteorSizeW,GameConstants::SmallMeteorSizeH);
-
+                
         _fallingObjects+=2;
     }
     else {
@@ -548,14 +547,24 @@ void Game::processMeteorExplode (std::shared_ptr<Entity> meteor)
     }
 }
 
-void Game::GenerateBullet(const TransformComponent & transformComp) {
-    std::shared_ptr<Entity>  bulletEntity = GetEntityManager().AddEntity("bullet",GameConstants::BulletEntity,GameConstants::BulletLayer);
-    bulletEntity->AddComponent<TransformComponent>( transformComp.GetPosition().x+GameConstants::BulletDeltaX,transformComp.GetPosition().y+GameConstants::BulletDeltaY, 0, 
-                                                    -GameConstants::BulletSpeed, GameConstants::BulletSizeW, GameConstants::BulletSizeH, GameConstants::kScaleGame);
-    bulletEntity->AddComponent<SpriteComponent>("bullet");
-    bulletEntity->AddComponent<ColliderComponent>(  GameConstants::BulletTag,transformComp.GetPosition().x+GameConstants::BulletDeltaX,transformComp.GetPosition().y+GameConstants::BulletDeltaY,
-                                                    transformComp.GetWidth(),transformComp.GetHeight());
-    bulletEntity->AddComponent<BulletEmitterComponent>(GameConstants::BulletSpeed,GameConstants::kUpAngle,_height+GameConstants::BulletDeltaY,false);
+void Game::BulletEvent() {
+    _eventBullet = true;
+}
+
+void Game::generateBullet() {
+    if (_eventBullet) {
+        std::shared_ptr<TransformComponent> transformComp = _player->GetComponent<TransformComponent>();
+
+        std::shared_ptr<Entity>  bulletEntity = GetEntityManager().AddEntity("bullet",GameConstants::BulletEntity,GameConstants::BulletLayer);
+        bulletEntity->AddComponent<TransformComponent>( transformComp->GetPosition().x+GameConstants::BulletDeltaX,transformComp->GetPosition().y+GameConstants::BulletDeltaY, 0, 
+                                                        -GameConstants::BulletSpeed, GameConstants::BulletSizeW, GameConstants::BulletSizeH, GameConstants::kScaleGame);
+        bulletEntity->AddComponent<SpriteComponent>("bullet");
+        bulletEntity->AddComponent<ColliderComponent>(  GameConstants::BulletTag,transformComp->GetPosition().x+GameConstants::BulletDeltaX,transformComp->GetPosition().y+GameConstants::BulletDeltaY,
+                                                        transformComp->GetWidth(),transformComp->GetHeight());
+        bulletEntity->AddComponent<BulletEmitterComponent>(GameConstants::BulletSpeed,GameConstants::kUpAngle,_height+GameConstants::BulletDeltaY,false);
+    
+        _eventBullet = false;
+    }
 }
 
 
@@ -578,6 +587,7 @@ void Game::destroy() {
 }
 
 void Game::adjustCanonPosition(GameConstants::CollisionType collisionType) {
+    
     std::shared_ptr<TransformComponent> transform = _player->GetComponent<TransformComponent>();
 
     if (collisionType == GameConstants::PlayerLeftBoundary) {
@@ -586,7 +596,8 @@ void Game::adjustCanonPosition(GameConstants::CollisionType collisionType) {
     else if (collisionType == GameConstants::PlayerRightBoundary)
     {
         transform->SetPosition(_width - transform->GetWidth(), transform->GetPosition().y);
-    }   
+    }
+   
 }
 
 void Game::generateMeteor(float deltaTime) {
@@ -654,7 +665,6 @@ void Game::generateSpinner(float deltaTime)
             int spinnerType = _random(_gen) % 2;
 
             if (spinnerType) {
-
                 std::shared_ptr<Entity> spinnerEntity = GetEntityManager().AddEntity(GameConstants::kSmallSpinnerName, GameConstants::SmallSpinnerEntity, GameConstants::NpcLayer);
                 spinnerEntity->AddComponent<TransformComponent>(posX,0,glm::cos(angle)*speed,glm::sin(angle)*speed,GameConstants::SmallSpinnerSize,GameConstants::SmallSpinnerSize,GameConstants::kScaleGame);
                 spinnerEntity->AddComponent<SpriteComponent>("small-spinner",4,90);

@@ -21,6 +21,7 @@ void Map::LoadMap(const string & filePath, int mapSizeX, int mapSizeY) {
     mapFile.open(filePath);
     int srcRectX,srcRectY;
     
+    
     for (int y = 0; y < mapSizeY; ++y) {
         for (int x = 0; x < mapSizeX; ++x) {
                 char ch;

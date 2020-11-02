@@ -1,3 +1,5 @@
+#include "entity.h"
+
 #include "bulletemittercomponent.h"
 
 BulletEmitterComponent::BulletEmitterComponent(int speed, int angleDeg, int range, bool loop) : _speed(speed), _range(range), 
