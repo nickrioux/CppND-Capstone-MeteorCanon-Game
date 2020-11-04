@@ -9,16 +9,12 @@
 #include "entitymanager.h"
 #include "gameconstants.h"
 
-using std::vector;
-using std::string;
-
 class Component;
 
 class Entity : public std::enable_shared_from_this<Entity> {
     
     public :
-        Entity(EntityManager& manager);
-        Entity(EntityManager& manager, const string & name, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
+        Entity(EntityManager& manager, const std::string & name, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
         ~Entity() {};
 
         bool IsActive();
@@ -27,7 +23,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
         void Destroy();
         void ListAllComponents() const;
 
-        const string & GetName() const { return _name; } 
+        const std::string & GetName() const { return _name; } 
         const GameConstants::LayerType GetLayer() const { return _layerType; }
         const GameConstants::EntityType GetEntityType() const { return _entityType; }
 
@@ -56,10 +52,10 @@ class Entity : public std::enable_shared_from_this<Entity> {
         }
 
     private:
-        string _name;
+        std::string _name;
         GameConstants::EntityType _entityType;
         EntityManager & _manager;
-        vector<std::shared_ptr<Component>> _components;
+        std::vector<std::shared_ptr<Component>> _components;
         GameConstants::LayerType _layerType;
         std::map<const std::type_info*, std::shared_ptr<Component> > _componentTypeMap;
         bool _isActive;

@@ -2,11 +2,12 @@
 
 #include "spritecomponent.h"
 
-SpriteComponent::SpriteComponent(const string & filePath, bool isFixed) : _transform(nullptr), _isFixed(isFixed), _animationSpeed(0), _isAnimated(false), _numFrames(0) {
+SpriteComponent::SpriteComponent(const std::string & filePath, bool isFixed) : _isFixed{isFixed}, _transform{nullptr}, _isAnimated{false}, _numFrames{0}, _animationSpeed{0} {
     SetTexture(filePath);
 }
 
-SpriteComponent::SpriteComponent(const std::string & id, int numFrames, int animationSpeed, bool isFixed) : _isAnimated(true), _numFrames(numFrames), _animationSpeed(animationSpeed), _isFixed(isFixed) {
+SpriteComponent::SpriteComponent(const std::string & id, int numFrames, int animationSpeed, bool isFixed) : _isFixed{isFixed}, _transform{nullptr}, _isAnimated{true}, 
+                                                                                                            _numFrames{numFrames}, _animationSpeed{animationSpeed} {
     SetTexture(id);
 }
 

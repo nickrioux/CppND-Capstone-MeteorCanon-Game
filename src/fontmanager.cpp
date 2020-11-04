@@ -2,7 +2,7 @@
 
 #include "fontmanager.h"
 
-std::shared_ptr<TTF_Font> FontManager::LoadFont(const string & fileName, int fontSize) {
+std::shared_ptr<TTF_Font> FontManager::LoadFont(const std::string & fileName, int fontSize) {
     return std::shared_ptr<TTF_Font>(TTF_OpenFont(fileName.c_str(), fontSize),TTF_CloseFont);
 }
 

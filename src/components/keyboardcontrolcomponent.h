@@ -19,7 +19,7 @@ class KeyboardControlComponent : public Component {
                                 const std::string & rightKey, 
                                 const std::string & shootKey);
 
-        std::string GetSDLKeyStringCode(std::string key);
+        const std::string GetSDLKeyStringCode(const std::string & key);
 
         void Init() override;
 

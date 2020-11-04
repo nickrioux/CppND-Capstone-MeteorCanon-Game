@@ -74,6 +74,9 @@ void Game::Init(int width, int height) {
 
     loadGame();
 
+    //Start Collisions Detection Thread
+    GetEntityManager().SimulateCollisions();
+
     return;
 }
 
@@ -90,6 +93,10 @@ void Game::Run(std::size_t target_frame_duration) {
 
 int Game::GetScore() const {
   return _score;
+}
+
+void Game::BulletEvent() {
+    _eventBullet = true;
 }
 
 void Game::loadGame() {
@@ -201,6 +208,7 @@ void Game::update(std::size_t target_frame_duration ) {
     // Sets the new ticks for the current frame to be used in the next pass
     _ticksLastFrame = SDL_GetTicks();
 
+    //Update Entities
     GetEntityManager().Update(deltaTime * GetSpeedFactor());
 
     handleCameraMovement();
@@ -216,7 +224,7 @@ void Game::update(std::size_t target_frame_duration ) {
         //Update Lifes
         updateLife();
 
-        //Generate Bullet
+        //Generate Bullet - Check if bullet event is triggered and generate a bullet
         generateBullet();
 
         //Generate Meteor
@@ -242,13 +250,11 @@ void Game::update(std::size_t target_frame_duration ) {
     //Update UI
     updateUI();
 
+    //Game Over
     if ((_ticksLastKill == 0) && (_lifes == 0) && (gameState == GameConstants::GameState::Running)) //GameOver
     {
-        std::cout << "Game Over!\n";
         gameState = GameConstants::GameState::GameOver;
-
         _speedFactor = GameConstants::kSpeedFactorLevel1;
-
         std::shared_ptr<Entity> gameOverLabel = GetEntityManager().AddEntity("gameOverLabel", GameConstants::UIEntity, GameConstants::UILayer);
         gameOverLabel->AddComponent<TextLabelComponent>(_width/3,_height/3,"GAME OVER!","charriot-font", GameConstants::kWhiteColor);
     }
@@ -325,16 +331,17 @@ void Game::updateUI() {
   std::shared_ptr<TextLabelComponent> levelLabel = _levelLabel->GetComponent<TextLabelComponent>();
   std::shared_ptr<TextLabelComponent> lifeLabel = _lifeLabel->GetComponent<TextLabelComponent>();
 
-  string score = std::to_string(_score);
+  std::string score = std::to_string(_score);
   scoreLabel->SetLabelText(score,"charriot-font");
 
-  string level = std::to_string(_currLevel) + "x";
+  std::string level = std::to_string(_currLevel) + "x";
   levelLabel->SetLabelText(level,"charriot-font");
 
-  string life = std::to_string(_lifes) + "x";
+  std::string life = std::to_string(_lifes) + "x";
   lifeLabel->SetLabelText(life,"charriot-font");
 }
 
+//The Camera is fixed for this game.
 void Game::handleCameraMovement() {
     _camera.x = 0;
     _camera.y = 0;
@@ -345,10 +352,8 @@ void Game::handleCameraMovement() {
 }
 
 void Game::checkCollisions() {
-
-    GetEntityManager().CheckCollisions();
     
-    vector<EntityManager::CollisionData> collisions;
+    std::vector<EntityManager::CollisionData> collisions;
     
     collisions =  GetEntityManager().GetCollisions();
     
@@ -361,113 +366,71 @@ void Game::checkCollisions() {
             if (collisionData.entityOne->IsActive() && collisionData.entityTwo->IsActive()) {
 
                 switch(collisionData.collisionType) {
-                case GameConstants::PlayerMeteor:
-                    generateExplosion(_player->GetComponent<TransformComponent>()->GetPosition(),_player->GetEntityType());
-                    collisionData.entityOne->Destroy();
-                    collisionData.entityTwo->Destroy();
-                    killPlayer();
-                    _fallingObjects--;
-                    break;
-                case GameConstants::PlayerLeftBoundary:
-                case GameConstants::PlayerRightBoundary:
-                    adjustCanonPosition(collisionData.collisionType);
-                    break;
-                case GameConstants::MeteorGround:
-                    if (collisionData.entityOne->GetEntityType() == GameConstants::CollideEntity) {
-
-                        if (collisionData.entityTwo->GetEntityType() == GameConstants::BigMeteorEntity)
-                        {
-                            _score += GameConstants::BigRockLandingScore * _currLevel;
-                        }
-                        else
-                        {
-                            _score += GameConstants::SmallRockLandingScore * _currLevel;
-                        }
-
-                        generateExplosion(collisionData.entityTwo->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityTwo->GetEntityType());
-                        
-                        collisionData.entityTwo->Destroy();
-                    }
-                    else
-                    {
-                        if (collisionData.entityOne->GetEntityType() == GameConstants::BigMeteorEntity)
-                        {
-                            _score += GameConstants::BigRockLandingScore * _currLevel;
-                        }
-                        else
-                        {
-                            _score += GameConstants::SmallRockLandingScore * _currLevel;
-                        }
-
-                        generateExplosion(collisionData.entityOne->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityOne->GetEntityType());
-
+                    case GameConstants::PlayerMeteor:
+                        generateExplosion(_player->GetComponent<TransformComponent>()->GetPosition(),_player->GetEntityType());
                         collisionData.entityOne->Destroy();
-                    }
-
-                    _fallingObjects--;
-
-                    break;
-                case GameConstants::EnemyBullet:
-                    if (collisionData.entityOne->GetEntityType() == GameConstants::BulletEntity)
-                    {
-                        switch(collisionData.entityTwo->GetEntityType()) {
-                            case GameConstants::BigMeteorEntity:
-                            case GameConstants::SmallMeteorEntity:
-                                processMeteorExplode(collisionData.entityTwo);
-                                _fallingObjects--;
-                                break;
-                            case GameConstants::SmallSpinnerEntity:
-                                _score += GameConstants::SmallSpinnerScore * _currLevel;
-                                generateExplosion(collisionData.entityTwo->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityTwo->GetEntityType());
-                                _fallingObjects--;
-                                break;
-                            case GameConstants::BigSpinnerEntity:
-                                _score += GameConstants::BigSpinnerScore * _currLevel;
-                                generateExplosion(collisionData.entityTwo->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityTwo->GetEntityType());
-                                _fallingObjects--;
-                                break;
-                            default:
-                                break;
-                        };
-                    }
-                    else
-                    {
-                        switch(collisionData.entityOne->GetEntityType()) {
-                            case GameConstants::BigMeteorEntity:
-                            case GameConstants::SmallMeteorEntity:
-                                processMeteorExplode(collisionData.entityOne);
-                                _fallingObjects--;
-                                break;
-                            case GameConstants::SmallSpinnerEntity:
-                                _score += GameConstants::SmallSpinnerScore;
-                                generateExplosion(collisionData.entityOne->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityOne->GetEntityType());
-                                _fallingObjects--;
-                                break;
-                            case GameConstants::BigSpinnerEntity:
-                                _score += GameConstants::BigSpinnerScore;
-                                generateExplosion(collisionData.entityOne->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityOne->GetEntityType());
-                                _fallingObjects--;
-                                break;
-                            default:
-                                break;
-                        };
-                    }
-                    collisionData.entityOne->Destroy();
-                    collisionData.entityTwo->Destroy();
-                    break;
-                case GameConstants::FallingObjectBoundary:
-                        if (collisionData.entityOne->GetEntityType() == GameConstants::CollideEntity) {
-                            collisionData.entityTwo->Destroy();
-                        }
-                        else if (collisionData.entityTwo->GetEntityType() == GameConstants::CollideEntity) {
-                            collisionData.entityOne->Destroy();
-                        }
+                        collisionData.entityTwo->Destroy();
+                        killPlayer();
                         _fallingObjects--;
-                    break;
-                case GameConstants::PlayerSpinner:
-                case GameConstants::SpinnerGround:
+                        break;
+                    case GameConstants::PlayerLeftBoundary:
+                    case GameConstants::PlayerRightBoundary:
+                        adjustCanonPosition(collisionData.collisionType);
+                        break;
+                    case GameConstants::MeteorGround: {
+                        std::shared_ptr<Entity> thatEntity = (collisionData.entityOne->GetEntityType() == GameConstants::CollideEntity ? collisionData.entityTwo : collisionData.entityOne);
+                        if (thatEntity->GetEntityType() == GameConstants::BigMeteorEntity)
+                        {
+                            _score += GameConstants::BigRockLandingScore * _currLevel;
+                        }
+                        else
+                        {
+                            _score += GameConstants::SmallRockLandingScore * _currLevel;
+                        }
+                        generateExplosion(thatEntity->GetComponent<TransformComponent>()->GetPosition(),thatEntity->GetEntityType());
+                        thatEntity->Destroy();
+                        _fallingObjects--;
+                        break;
+                    };
+                    case GameConstants::EnemyBullet: {
+                        std::shared_ptr<Entity> thatEntity = (collisionData.entityOne->GetEntityType() == GameConstants::BulletEntity ? collisionData.entityTwo : collisionData.entityOne);
+                        switch(thatEntity->GetEntityType()) {
+                                case GameConstants::BigMeteorEntity:
+                                case GameConstants::SmallMeteorEntity:
+                                    processMeteorExplode(thatEntity);
+                                    _fallingObjects--;
+                                    break;
+                                case GameConstants::SmallSpinnerEntity:
+                                    _score += GameConstants::SmallSpinnerScore * _currLevel;
+                                    generateExplosion(thatEntity->GetComponent<TransformComponent>()->GetPosition(),thatEntity->GetEntityType());
+                                    _fallingObjects--;
+                                    break;
+                                case GameConstants::BigSpinnerEntity:
+                                    _score += GameConstants::BigSpinnerScore * _currLevel;
+                                    generateExplosion(thatEntity->GetComponent<TransformComponent>()->GetPosition(),thatEntity->GetEntityType());
+                                    _fallingObjects--;
+                                    break;
+                                default:
+                                    break;
+                        };
+                        collisionData.entityOne->Destroy();
+                        collisionData.entityTwo->Destroy();
+                        break;
+                    };
+                    case GameConstants::FallingObjectBoundary:
+                            if (collisionData.entityOne->GetEntityType() == GameConstants::CollideEntity) {
+                                collisionData.entityTwo->Destroy();
+                            }
+                            else if (collisionData.entityTwo->GetEntityType() == GameConstants::CollideEntity) {
+                                collisionData.entityOne->Destroy();
+                            }
+                            _fallingObjects--;
+                        break;
+                    case GameConstants::PlayerSpinner:
+                    case GameConstants::SpinnerGround:
                         _score += GameConstants::LostBaseScore;
                         generateExplosion(_player->GetComponent<TransformComponent>()->GetPosition(),_player->GetEntityType());
+                        
                         if ((collisionData.entityOne->GetEntityType() == GameConstants::SmallSpinnerEntity) || (collisionData.entityOne->GetEntityType() == GameConstants::BigSpinnerEntity)) {
                             generateExplosion(collisionData.entityOne->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityOne->GetEntityType());
                             collisionData.entityOne->Destroy(); //Spinner
@@ -545,10 +508,6 @@ void Game::processMeteorExplode (std::shared_ptr<Entity> meteor)
         generateExplosion(meteor->GetComponent<TransformComponent>()->GetPosition(),meteor->GetEntityType());
         _score += GameConstants::BigRockScore * _currLevel;
     }
-}
-
-void Game::BulletEvent() {
-    _eventBullet = true;
 }
 
 void Game::generateBullet() {

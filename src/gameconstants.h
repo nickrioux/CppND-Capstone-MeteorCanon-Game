@@ -161,6 +161,11 @@ namespace GameConstants {
 
      //Angle Constant (degrees)
      const int kUpAngle{270};
+
+     //SDL Keys
+     const std::string kLeftKey{"1073741904"};
+     const std::string kRightKey{"1073741903"};
+     const std::string kSpaceKey{"32"}; 
 };
 
 #endif

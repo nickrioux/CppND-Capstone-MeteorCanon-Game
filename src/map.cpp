@@ -7,7 +7,7 @@
 #include "components/tilecomponent.h"
 #include "map.h"
 
-Map::Map(const string & textureId, int scale, int tileSize) : _textureId(textureId), _scale(scale), _tileSize(tileSize) {
+Map::Map(const std::string & textureId, int scale, int tileSize) : _textureId{textureId}, _scale{scale}, _tileSize{tileSize} {
 
 };
 
@@ -15,7 +15,7 @@ Map::~Map() {
         destroy();
 }
 
-void Map::LoadMap(const string & filePath, int mapSizeX, int mapSizeY) {
+void Map::LoadMap(const std::string & filePath, int mapSizeX, int mapSizeY) {
     
     std::fstream mapFile;
     mapFile.open(filePath);
@@ -43,7 +43,7 @@ void Map::AddTile(int srcRectX, int srxRectY, int x, int y) {
 }
 
 void Map::destroy() {
-        vector<std::shared_ptr<Entity>> currentMap = Game::GetGame().GetEntityManager().GetEntitiesByLayer(GameConstants::BackgroundLayer);
+        std::vector<std::shared_ptr<Entity>> currentMap = Game::GetGame().GetEntityManager().GetEntitiesByLayer(GameConstants::BackgroundLayer);
         for (auto & entity : currentMap) {
                 entity->Destroy();
         }

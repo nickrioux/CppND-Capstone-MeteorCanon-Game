@@ -4,14 +4,6 @@
 #include "fontmanager.h"
 #include "components/transformcomponent.h"
 
-AssetManager::AssetManager() {
-
-}
-
-AssetManager::~AssetManager() {
-
-}
-
 void AssetManager::ClearData() {
     _textures.clear();
 }

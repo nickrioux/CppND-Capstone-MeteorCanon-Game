@@ -19,11 +19,16 @@ class Game {
       ~Game();
       void Init(int width, int height);
       void Run(std::size_t target_frame_duration);
+
+      //Status Methods
       int GetScore() const;
       bool IsRunning() const { return(_runningStatus); }
       float & GetSpeedFactor() { return(_speedFactor); }
 
+      //Return the Singleton Instance of Game
       static Game & GetGame() { static Game game; return(game); }
+
+      //Access methods for Managers, Camera and SDL Event
       std::unique_ptr<SDL_Renderer,decltype(&SDL_DestroyRenderer)> & GetRenderer() { return _sdl_renderer; }
       const SDL_Rect & GetCamera() { return _camera; }
       EntityManager & GetEntityManager()  { return(*_entityManager);}
@@ -69,7 +74,7 @@ class Game {
      int _lifes{3};
      int _fallingObjects{0};
 
-     //Random Generator
+     //Random Generators
      std::random_device _rd;
      std::mt19937  _gen;
      std::uniform_int_distribution<int> _random_pos_w;

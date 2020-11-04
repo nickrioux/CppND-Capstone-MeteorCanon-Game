@@ -6,7 +6,7 @@
 #include "texturemanager.h"
 
 
-std::shared_ptr<SDL_Texture> TextureManager::LoadTexture(const string & fileName) {
+std::shared_ptr<SDL_Texture> TextureManager::LoadTexture(const std::string & fileName) {
     SDL_Surface* surface = IMG_Load(fileName.c_str());
     std::shared_ptr<SDL_Texture> texture = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(Game::GetGame().GetRenderer().get(), surface),SDL_DestroyTexture);
     SDL_FreeSurface(surface);

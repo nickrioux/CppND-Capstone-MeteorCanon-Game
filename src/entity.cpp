@@ -5,14 +5,10 @@
 #include "entity.h"
 #include "component.h"
 
-Entity::Entity(EntityManager& manager): _manager(manager) {
-    _isActive = true;
-    _timeCreation = SDL_GetTicks();
-}
-
-Entity::Entity(EntityManager& manager, const string & name, GameConstants::EntityType entityType, GameConstants::LayerType layerType): _manager(manager), _name(name), _entityType(entityType), _layerType(layerType) {
-    _isActive = true;
-    _timeCreation = SDL_GetTicks();
+Entity::Entity(EntityManager& manager, const std::string & name, GameConstants::EntityType entityType, GameConstants::LayerType layerType):  _manager{manager}, 
+                                                                                                                                        _name{name}, _entityType{entityType}, 
+                                                                                                                                        _isActive{true}, _layerType{layerType},
+                                                                                                                                        _timeCreation(SDL_GetTicks()) {
 }
 
 void Entity::Update(float deltaTime) {

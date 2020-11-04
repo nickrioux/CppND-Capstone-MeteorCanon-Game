@@ -13,7 +13,7 @@
 
 class TileComponent : public Component {
     public :
-        TileComponent(int srcRectX, int srcRectY, int x, int y, int tileSize, int tileScale, const string & textureId);
+        TileComponent(int srcRectX, int srcRectY, int x, int y, int tileSize, int tileScale, const std::string & textureId);
                 
         void Update(float deltaTime) override;
         void Render() override;

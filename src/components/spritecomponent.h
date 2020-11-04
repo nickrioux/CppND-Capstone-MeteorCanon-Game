@@ -9,11 +9,9 @@
 #include "texturemanager.h"
 #include "transformcomponent.h"
 
-using std::string;
-
 class SpriteComponent: public Component {
     public:
-        SpriteComponent(const string & filePath, bool isFixed = false);
+        SpriteComponent(const std::string & filePath, bool isFixed = false);
         SpriteComponent(const std::string & id, int numFrames, int animationSpeed, bool isFixed = false);
 
         void SetTexture(const std::string & assetTextureId);

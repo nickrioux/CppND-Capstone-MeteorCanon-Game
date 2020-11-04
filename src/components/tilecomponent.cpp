@@ -1,19 +1,10 @@
 #include "tilecomponent.h"
 
-TileComponent::TileComponent(int srcRectX, int srcRectY, int x, int y, int tileSize, int tileScale, const string & textureId) {
-    _texture = Game::GetGame().GetAssetManager().GetTexture(textureId);
-    _srcRect.x = srcRectX;
-    _srcRect.y = srcRectY;
-    _srcRect.w = tileSize;
-    _srcRect.h = tileSize;
-
-    _destRect.x = x;
-    _destRect.y = y;
-    _destRect.w = tileSize * tileScale;
-    _destRect.h = tileSize * tileScale;
-
-    _position.x = x;
-    _position.y = y;
+TileComponent::TileComponent(int srcRectX, int srcRectY, int x, int y, int tileSize, int tileScale, const std::string & textureId) : _texture{Game::GetGame().GetAssetManager().GetTexture(textureId)}, 
+                                                                                                                                _srcRect{srcRectX,srcRectY,tileSize,tileSize},
+                                                                                                                                _destRect{x,y,tileSize*tileScale,tileSize*tileScale},
+                                                                                                                                _position{x,y} {
+    
 }
 
 void TileComponent::Update(float deltaTime) {

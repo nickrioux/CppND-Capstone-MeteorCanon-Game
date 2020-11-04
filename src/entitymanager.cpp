@@ -9,10 +9,10 @@
 #include "entitymanager.h"
 
 EntityManager::~EntityManager() { 
+    //Scope the Mutex lock
     {
         std::unique_lock<std::mutex> lck = GetLock();
         _endCollisionsThread = true;
-
     }
     _collisionThread->join();
 }
@@ -20,7 +20,7 @@ EntityManager::~EntityManager() {
 
 void EntityManager::ClearData() {
     for (auto & entity : _entities) {
-            entity->Destroy();
+        entity->Destroy();
     }
 }
 
@@ -28,32 +28,34 @@ void EntityManager::Update(float deltaTime) {
     std::unique_lock<std::mutex> lck = GetLock();
     
     for (auto & entity : _entities) {
-            entity->Update(deltaTime);
+        entity->Update(deltaTime);
     }
 
     destroyInactiveEntities();
 }
 
 void EntityManager::Render() {
-    //TODO - Final Solution (Sort Entity by Layer when adding a new Entity)
-    for (int layerNumber = 0; layerNumber < GameConstants::kNumLayers; ++layerNumber) {
-        for (auto & entity : GetEntitiesByLayer(static_cast<GameConstants::LayerType>(layerNumber))) {
-                entity->Render();
-        }
+    //Sort Entity by Layer and scope the lock on _entities
+    {
+        std::unique_lock<std::mutex> lck = GetLock();
+        std::sort(_entities.begin(),_entities.end(),[](const std::shared_ptr<Entity> lhs, const std::shared_ptr<Entity> & rhs){return(lhs->GetLayer() < rhs->GetLayer());});
+    }
+
+    for (auto & entity : _entities) {
+            entity->Render();
     }
 }
 
-void EntityManager::CheckCollisions() {
-    if (!_threadLaunched) {       
+void EntityManager::SimulateCollisions() {
+    if (_collisionThread == nullptr) {       
         _collisionThread = std::make_unique<std::thread>(&EntityManager::checkCollisions, this);
-        _threadLaunched = true;
     }
 }
 
-vector<EntityManager::CollisionData> EntityManager::GetCollisions() {
+std::vector<EntityManager::CollisionData> EntityManager::GetCollisions() {
     std::unique_lock<std::mutex> lck = GetLock(std::defer_lock);
     
-    vector<EntityManager::CollisionData> collisions;
+    std::vector<EntityManager::CollisionData> collisions;
 
     if (lck.try_lock()) {
         collisions = _collisions;
@@ -75,11 +77,11 @@ void EntityManager::checkCollisions() {
 
         _collisions.clear();
 
-        for (int i = 0; i < _entities.size() - 1; i++) {
+        for (int i = 0; i < _entities.size(); ++i) {
             auto& thisEntity = _entities[i];
             if (thisEntity->HasComponent<ColliderComponent>()) {
                 std::shared_ptr<ColliderComponent> thisCollider = thisEntity->GetComponent<ColliderComponent>();
-                for (int j = i+1; j < _entities.size(); j++) {
+                for (int j = i-1; j < _entities.size(); ++j) {
                     auto& thatEntity = _entities[j];
                     if (thisEntity->GetName().compare(thatEntity->GetName()) != 0 && thatEntity->HasComponent<ColliderComponent>()) {
                         std::shared_ptr<ColliderComponent> thatCollider = thatEntity->GetComponent<ColliderComponent>();
@@ -152,6 +154,7 @@ bool EntityManager::HasNoEntities() {
     return(_entities.size() == 0);
 }
 
+//Validate Collions between two Entities. 
 bool EntityManager::validateCollision(const std::shared_ptr<ColliderComponent> & colliderOne, const std::shared_ptr<ColliderComponent> & colliderTwo, 
                                       const GameConstants::ColliderTag & collOneTag, const GameConstants::ColliderTag & collTwoTag) const {
     if ((colliderOne->GetColliderTag() == collOneTag) && (colliderTwo->GetColliderTag() == collTwoTag) ||
@@ -164,9 +167,9 @@ bool EntityManager::validateCollision(const std::shared_ptr<ColliderComponent> &
 }
 
 void EntityManager::destroyInactiveEntities() {
-    for (int i = 0; i < _entities.size(); i++) {
-        if (!_entities[i]->IsActive()) {
-            _entities.erase(_entities.begin() + i);
+    for (auto it = _entities.begin(); it != _entities.end(); ++it) {
+        if (!(*it)->IsActive()) {
+            _entities.erase(it);
         }
     }
 }
@@ -176,10 +179,6 @@ std::shared_ptr<Entity> EntityManager::AddEntity(std::string entityName, GameCon
     std::shared_ptr<Entity> entity = std::make_shared<Entity>(*this, entityName, entityType, layerType);
     _entities.emplace_back(entity);
     return entity;
-}
-
-std::vector<std::shared_ptr<Entity>> EntityManager::GetEntities() const {
-    return(_entities);
 }
 
 std::vector<std::shared_ptr<Entity>> EntityManager::GetEntitiesByLayer(GameConstants::LayerType layerType) const {
