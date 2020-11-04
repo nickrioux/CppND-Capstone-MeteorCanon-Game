@@ -87,8 +87,6 @@ void Game::Run(std::size_t target_frame_duration) {
         update(target_frame_duration);
         render();
   }
-
-  std::cout << "Falling Objects : " << _fallingObjects << std::endl;   
 }
 
 int Game::GetScore() const {
