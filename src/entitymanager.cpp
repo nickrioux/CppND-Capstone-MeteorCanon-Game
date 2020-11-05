@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <future>
+#include <algorithm>
 
 #include "game.h"
 #include "entity.h"

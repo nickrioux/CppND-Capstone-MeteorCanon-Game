@@ -22,6 +22,10 @@ void SpriteComponent::Init() {
     sourceRectangle_.y = 0;
     sourceRectangle_.w = transform_->GetWidth();
     sourceRectangle_.h = transform_->GetHeight();
+    destinationRectangle_.x = static_cast<int>(transform_->GetPosition().x) - (isFixed_ ? 0 : Game::GetGame().GetCamera().x);
+    destinationRectangle_.y = static_cast<int>(transform_->GetPosition().y) - (isFixed_ ? 0 : Game::GetGame().GetCamera().y);
+    destinationRectangle_.w = transform_->GetWidth() * transform_->GetScale();
+    destinationRectangle_.h = transform_->GetHeight() * transform_->GetScale();
 }
 
 void SpriteComponent::Update(float deltaTime)  {
