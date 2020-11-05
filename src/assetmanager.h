@@ -19,8 +19,8 @@ class AssetManager {
 
 
     private:
-        std::map<std::string, std::shared_ptr<SDL_Texture>> _textures;
-        std::map<std::string, std::shared_ptr<TTF_Font>> _fonts;
+        std::map<std::string, std::shared_ptr<SDL_Texture>> textures_;
+        std::map<std::string, std::shared_ptr<TTF_Font>> fonts_;
 
 };
 

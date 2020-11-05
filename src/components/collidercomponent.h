@@ -16,15 +16,15 @@ class ColliderComponent : public Component {
             void Init() override;
             void Update(float deltaTime) override;
 
-            GameConstants::ColliderTag GetColliderTag() const { return _colliderTag; }
-            SDL_Rect GetCollider() const { return _collider; }
+            GameConstants::ColliderTag GetColliderTag() const { return colliderTag_; }
+            SDL_Rect GetCollider() const { return collider_; }
 
         private:
-            GameConstants::ColliderTag _colliderTag;
-            SDL_Rect _collider;
-            SDL_Rect _srcRect;
-            SDL_Rect _destRect;
-            std::shared_ptr<TransformComponent> _transform;
+            GameConstants::ColliderTag colliderTag_;
+            SDL_Rect collider_;
+            SDL_Rect srcRect_;
+            SDL_Rect destRect_;
+            std::shared_ptr<TransformComponent> transform_;
 };
 
 #endif

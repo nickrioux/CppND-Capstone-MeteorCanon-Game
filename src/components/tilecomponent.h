@@ -19,10 +19,10 @@ class TileComponent : public Component {
         void Render() override;
 
     private:
-        std::shared_ptr<SDL_Texture> _texture;
-        SDL_Rect _srcRect;
-        SDL_Rect _destRect;
-        glm::vec2 _position;
+        std::shared_ptr<SDL_Texture> texture_{nullptr};
+        SDL_Rect srcRect_;
+        SDL_Rect destRect_;
+        glm::vec2 position_;
 };
 
 #endif

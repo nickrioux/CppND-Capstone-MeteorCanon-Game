@@ -21,11 +21,11 @@ class TextLabelComponent: public Component {
         void Render() override;
         
     private:
-        SDL_Rect _position;
-        std::string _text;
-        std::string _fontFamily;
-        SDL_Color _color;
-        std::shared_ptr<SDL_Texture> _texture;
+        SDL_Rect position_;
+        std::string text_;
+        std::string fontFamily_;
+        SDL_Color color_;
+        std::shared_ptr<SDL_Texture> texture_{nullptr};
 };
 
 #endif

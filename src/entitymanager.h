@@ -32,18 +32,18 @@ class EntityManager {
         unsigned int GetEntityCount();
         void ListAllEntities() const;
 
-        std::unique_lock<std::mutex> GetLock() { return(std::unique_lock<std::mutex>(_mtx)); }
-        std::unique_lock<std::mutex> GetLock(std::defer_lock_t t) { return(std::unique_lock<std::mutex>(_mtx,t)); }
+        std::unique_lock<std::mutex> GetLock() { return(std::unique_lock<std::mutex>(mtx_)); }
+        std::unique_lock<std::mutex> GetLock(std::defer_lock_t t) { return(std::unique_lock<std::mutex>(mtx_,t)); }
 
     private:
         //Thread
-        std::unique_ptr<std::thread> _collisionThread;
-        bool _threadLaunched{false};
-        bool _endCollisionsThread{false};
-        std::mutex _mtx;
+        std::unique_ptr<std::thread> collisionThread_{nullptr};
+        bool threadLaunched_{false};
+        bool endCollisionsThread_{false};
+        std::mutex mtx_;
 
-        std::vector<std::shared_ptr<Entity>> _entities; 
-        std::vector<EntityManager::CollisionData> _collisions{};
+        std::vector<std::shared_ptr<Entity>> entities_{}; 
+        std::vector<EntityManager::CollisionData> collisions_{};
 
         //Private Functions
         void checkCollisions();

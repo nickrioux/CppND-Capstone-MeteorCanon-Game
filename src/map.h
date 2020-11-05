@@ -11,9 +11,9 @@ class Map {
         void AddTile(int srcX, int srxY, int x, int y);
 
     private:
-        std::string _textureId;
-        int _scale;
-        int _tileSize;
+        std::string textureId_;
+        int scale_;
+        int tileSize_;
 
         void destroy();
 };

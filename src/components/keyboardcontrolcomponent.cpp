@@ -4,10 +4,10 @@
 
 KeyboardControlComponent::KeyboardControlComponent( const std::string & leftKey, 
                                                     const std::string & rightKey, 
-                                                    const std::string & shootKey) : _leftKey{GetSDLKeyStringCode(leftKey)},  
-                                                                                    _rightKey{GetSDLKeyStringCode(rightKey)},
-                                                                                    _shootKey{GetSDLKeyStringCode(shootKey)},
-                                                                                    _transform{nullptr} {
+                                                    const std::string & shootKey) : leftKey_{GetSDLKeyStringCode(leftKey)},  
+                                                                                    rightKey_{GetSDLKeyStringCode(rightKey)},
+                                                                                    shootKey_{GetSDLKeyStringCode(shootKey)},
+                                                                                    transform_{nullptr} {
 
 }
 
@@ -19,22 +19,22 @@ const std::string KeyboardControlComponent::GetSDLKeyStringCode(const std::strin
 }
 
 void KeyboardControlComponent::Init() {
-    _transform = GetOwner()->GetComponent<TransformComponent>();
+    transform_ = GetOwner()->GetComponent<TransformComponent>();
 }
 
 void KeyboardControlComponent::Update(float deltaTime) {
     if (Game::GetGame().GetEvent().type == SDL_KEYDOWN) {
         std::string keyCode = std::to_string(Game::GetGame().GetEvent().key.keysym.sym);
 
-        if (keyCode.compare(_leftKey) == 0) {
-            _transform->SetVelocity(-GameConstants::PlayerSpeed,0);
+        if (keyCode.compare(leftKey_) == 0) {
+            transform_->SetVelocity(-GameConstants::PlayerSpeed,0);
         }
 
-        if (keyCode.compare(_rightKey) == 0) {
-            _transform->SetVelocity(GameConstants::PlayerSpeed,0);
+        if (keyCode.compare(rightKey_) == 0) {
+            transform_->SetVelocity(GameConstants::PlayerSpeed,0);
         }
         
-        if (keyCode.compare(_shootKey) == 0) {
+        if (keyCode.compare(shootKey_) == 0) {
             Game::GetGame().BulletEvent();
         }
     }
@@ -42,11 +42,11 @@ void KeyboardControlComponent::Update(float deltaTime) {
     if (Game::GetGame().GetEvent().type == SDL_KEYUP) {
         std::string keyCode = std::to_string(Game::GetGame().GetEvent().key.keysym.sym);
 
-        if (keyCode.compare(_leftKey) == 0) {
-            _transform->SetVelocity(0,0);                }
+        if (keyCode.compare(leftKey_) == 0) {
+            transform_->SetVelocity(0,0);                }
 
-        if (keyCode.compare(_rightKey) == 0) {
-            _transform->SetVelocity(0,0);
+        if (keyCode.compare(rightKey_) == 0) {
+            transform_->SetVelocity(0,0);
         }
     }
 }
