@@ -655,15 +655,15 @@ void Game::generateExplosion(glm::vec2 pos, const GameConstants::EntityType & en
             explosion2->AddComponent<SpriteComponent>("explosion0");
             explosion2->SetLifeTime(GameConstants::kTimeRestartPlayer);
             
-            explosion3->AddComponent<TransformComponent>(pos.x,pos.y,0,-GameConstants::CanonExplosionHighSpeed,43,43,GameConstants::kScaleGame);
+            explosion3->AddComponent<TransformComponent>(pos.x,pos.y,0,-GameConstants::CanonExplosionHighSpeed,GameConstants::ExplosionSize,GameConstants::ExplosionSize,GameConstants::kScaleGame);
             explosion3->AddComponent<SpriteComponent>("explosion0");
             explosion3->SetLifeTime(GameConstants::kTimeRestartPlayer);
             
-            explosion4->AddComponent<TransformComponent>(pos.x,pos.y,-GameConstants::CanonExplosionLowSpeed,-GameConstants::CanonExplosionLowSpeed,43,43,GameConstants::kScaleGame);
+            explosion4->AddComponent<TransformComponent>(pos.x,pos.y,-GameConstants::CanonExplosionLowSpeed,-GameConstants::CanonExplosionLowSpeed,GameConstants::ExplosionSize,GameConstants::ExplosionSize,GameConstants::kScaleGame);
             explosion4->AddComponent<SpriteComponent>("explosion0");
             explosion4->SetLifeTime(GameConstants::kTimeRestartPlayer);
 
-            explosion5->AddComponent<TransformComponent>(pos.x,pos.y,-GameConstants::CanonExplosionHighSpeed,0,43,43,GameConstants::kScaleGame);
+            explosion5->AddComponent<TransformComponent>(pos.x,pos.y,-GameConstants::CanonExplosionHighSpeed,0,GameConstants::ExplosionSize,GameConstants::ExplosionSize,GameConstants::kScaleGame);
             explosion5->AddComponent<SpriteComponent>("explosion0");
             explosion5->SetLifeTime(GameConstants::kTimeRestartPlayer);
         }
