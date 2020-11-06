@@ -3,19 +3,17 @@
 
 #include <string>
 
-using std::string;
-
 class Map {
     public :
-        Map(const string & textureId, int scale, int tileSize);
+        Map(const std::string & textureId, int scale, int tileSize);
         ~Map();
-        void LoadMap(const string & filePath, int mapSizeX, int mapSizeY);
+        void LoadMap(const std::string & filePath, int mapSizeX, int mapSizeY);
         void AddTile(int srcX, int srxY, int x, int y);
 
     private:
-        string _textureId;
-        int _scale;
-        int _tileSize;
+        std::string textureId_;
+        int scale_;
+        int tileSize_;
 
         void destroy();
 };

@@ -19,65 +19,71 @@ class Game {
       ~Game();
       void Init(int width, int height);
       void Run(std::size_t target_frame_duration);
-      int GetScore() const;
-      bool IsRunning() const { return(_runningStatus); }
-      float & GetSpeedFactor() { return(_speedFactor); }
 
+      //Status Methods
+      int GetScore() const;
+      bool IsRunning() const { return(runningStatus_); }
+      const float & GetSpeedFactor() { return(speedFactor_); }
+
+      //Return the Singleton Instance of Game
       static Game & GetGame() { static Game game; return(game); }
-      std::unique_ptr<SDL_Renderer,decltype(&SDL_DestroyRenderer)> & GetRenderer() { return _sdl_renderer; }
-      const SDL_Rect & GetCamera() { return _camera; }
-      EntityManager & GetEntityManager()  { return(*_entityManager);}
-      AssetManager & GetAssetManager()  { return(*_assetManager);}
-      const SDL_Event & GetEvent() { return(_event); }
+
+      //Access methods for Managers, Camera and SDL Event
+      std::unique_ptr<SDL_Renderer,decltype(&SDL_DestroyRenderer)> & GetRenderer() { return sdl_renderer_; }
+      const SDL_Rect & GetCamera() { return camera_; }
+      EntityManager & GetEntityManager()  { return(*entityManager_);}
+      AssetManager & GetAssetManager()  { return(*assetManager_);}
+      const SDL_Event & GetEvent() { return(event_); }
 
       //Event Functions
       void BulletEvent();
 
 
  private:
-     std::unique_ptr<AssetManager> _assetManager;
-     std::unique_ptr<EntityManager> _entityManager;
-     std::unique_ptr<SDL_Window,decltype(&SDL_DestroyWindow)> _sdl_window;
-     SDL_Event _event;
-     std::unique_ptr<SDL_Renderer,decltype(&SDL_DestroyRenderer)> _sdl_renderer;
-     SDL_Rect _camera;
+     std::unique_ptr<AssetManager> assetManager_;
+     std::unique_ptr<EntityManager> entityManager_;
+     std::unique_ptr<SDL_Window,decltype(&SDL_DestroyWindow)> sdl_window_;
+     SDL_Event event_;
+     std::unique_ptr<SDL_Renderer,decltype(&SDL_DestroyRenderer)> sdl_renderer_;
+     SDL_Rect camera_;
 
      //Game Entities Player and Map
-     std::unique_ptr<Map> _map;
-     std::shared_ptr<Entity> _player;
+     std::unique_ptr<Map> map_;
+     std::shared_ptr<Entity> player_;
 
      //UI Entities
-     std::shared_ptr<Entity> _scoreLabel;
-     std::shared_ptr<Entity> _levelLabel;
-     std::shared_ptr<Entity> _lifeLabel;
-     std::shared_ptr<Entity> _lifeSprite;
-     std::shared_ptr<Entity> _gameOverLabel;
+     std::shared_ptr<Entity> scoreLabel_;
+     std::shared_ptr<Entity> levelLabel_;
+     std::shared_ptr<Entity> lifeLabel_;
+     std::shared_ptr<Entity> lifeSprite_;
+     std::shared_ptr<Entity> gameOverLabel_;
 
      //Game Variables and Status
-     bool _eventBullet{false};
-     bool _runningStatus{true};
-     int _score{0};
-     int _maxScore{0};
-     int _currLevel{1};
-     float _speedFactor{1.0f};
-     int _ticksLastFrame{0};
-     int _ticksLastKill{0};
-     float _generateSpinnerTime{0.0f};
-     float _generateMeteorTime{0.0f};
-     int _width{0};
-     int _height{0};
-     int _lifes{3};
-     int _fallingObjects{0};
+     int gameState_{GameConstants::GameState::Running};
+     bool eventBullet_{false};
+     bool runningStatus_{true};
+     int score_{0};
+     int maxScore_{0};
+     int currLevel_{1};
+     float speedFactor_{1.0f};
+     int ticksLastFrame_{0};
+     int ticksLastKill_{0};
+     float generateSpinnerTime_{0.0f};
+     float generateMeteorTime_{0.0f};
+     int width_{0};
+     int height_{0};
+     int lifes_{3};
+     int fallingObjects_{0};
 
-     //Random Generator
-     std::random_device _rd;
-     std::mt19937  _gen;
-     std::uniform_int_distribution<int> _random_pos_w;
-     std::uniform_int_distribution<int> _random_degree_left;
-     std::uniform_int_distribution<int> _random_degree_right;
-     std::uniform_int_distribution<int> _random_speed;
-     std::uniform_int_distribution<int> _random_meteor;
-     std::uniform_int_distribution<int> _random;
+     //Random Generators
+     std::random_device rd_;
+     std::mt19937  gen_;
+     std::uniform_int_distribution<int> random_pos_w_;
+     std::uniform_int_distribution<int> random_degree_left_;
+     std::uniform_int_distribution<int> random_degree_right_;
+     std::uniform_int_distribution<int> random_speed_;
+     std::uniform_int_distribution<int> random_meteor_;
+     std::uniform_int_distribution<int> random_;
 
     //Generic Game Function
     void init(int width, int height);

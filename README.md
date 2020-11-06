@@ -9,19 +9,23 @@ This is a repo for the Capstone project in the [Udacity C++ Nanodegree Program](
 
 For this project, I have decided to do a partial clone of my first game played on my first console (Mattel Intellivision).  This game was Astromash.
 
-The game was built and tested on Mac OSX and Linux platform and windows.
+The game was built and tested on Mac OSX and Linux platform.
 
 # File Structure
 
 This repository contains :
-
+- `doc`: Documentation.
 - `assets/`: Contains the assets for the game.
 - `src/`: Source.  Contains the .cpp and .h files.
 - `src/component` : Source.  Contains the different components source files (.h and .cpp).
-- `lib/glm`: Contains the glm match library.
+- `lib/glm`: Contains the glm math library.
 - `CMakeLists.txt`: cmake configuration file.
 - `README.md`: This file
 - `LICENSE` : License file (GNU General Public License)
+
+# Class Structure
+
+<img src="./doc/UML.png">
 
 ## Dependencies for Running Locally
 * cmake >= 3.7
@@ -100,40 +104,40 @@ __Loops, Functions, I/O__
 
 |DONE | CRITERIA | MEETS SPECIFICATIONS| WHERE |
 |-- | -- | --| -- |
-| :heavy_check_mark: | The project demonstrates an understanding of C++ functions and control structures.| A variety of control structures are used in the project. The project code is clearly organized into functions.| Every *.cpp file |
-| :heavy_check_mark: | The project reads data from a file and process the data, or the program writes data to a file. | The project reads data from an external file or writes data to a file as part of the necessary operation of the program.| reads map file in map.cpp  |
+| :heavy_check_mark: | The project demonstrates an understanding of C++ functions and control structures.| A variety of control structures are used in the project. The project code is clearly organized into functions.| See Entity::Update function (line 15 in entity.cpp), see EntityManager::checkCollisions() (line 68) in entitymanager.cpp, see Game::processInput() (line 168) in game.cpp  and in all *.cpp file |
+| :heavy_check_mark: | The project reads data from a file and process the data, or the program writes data to a file. | The project reads data from an external file or writes data to a file as part of the necessary operation of the program.| See Map::LoadMap(...) (line 18) in map.cpp  |
 | :heavy_check_mark: | The project accepts user input and processes the input.|The project accepts input from a user as part of the necessary operation of the program.|  game.cpp Game::processInput() member function |
 
 __Object Oriented Programming__
 
 |DONE | CRITERIA | MEETS SPECIFICATIONS| WHERE |
 |-- | -- | --| -- |
-| :heavy_check_mark: | The project uses Object Oriented Programming techniques. | The project code is organized into classes with class attributes to hold the data, and class methods to perform tasks. | All *.cpp and *.h files |
-| :heavy_check_mark: | Classes use appropriate access specifiers for class members. | All class data members are explicitly specified as public, protected, or private.| All *.cpp and *.h files |
-| :heavy_check_mark: | Class constructors utilize member initialization lists. | All class members that are set to argument values are initialized through member initialization lists.| All *.cpp and *.h files |
-| :heavy_check_mark: | Classes abstract implementation details from their interfaces. | All class member functions document their effects, either through function names, comments, or formal documentation. Member functions do not change program state in undocumented ways.| All *.cpp and *.h files |
-| :heavy_check_mark: | Classes encapsulate behavior. | Appropriate data and functions are grouped into classes. Member data that is subject to an invariant is hidden from the user. State is accessed via member functions.| All *.cpp and *.h files |
-| :heavy_check_mark: | Classes follow an appropriate inheritance hierarchy. | Inheritance hierarchies are logical. Composition is used instead of inheritance when appropriate. Abstract classes are composed of pure virtual functions. Override functions are specified.| See component.h and all components classes derived from it. |
-| | Overloaded functions allow the same function to operate on different parameters. | One function is overloaded with different signatures for the same function name. | TODO VERIFY |
-| :heavy_check_mark: | Derived class functions override virtual base class functions. |One member function in an inherited class overrides a virtual base class member function.| Done in transformcomponent.h with Update member function |
-| :heavy_check_mark: | Templates generalize functions in the project. | One function is declared with a template that allows it to accept a generic parameter.| Done in entity.h with the component creation. |
+| :heavy_check_mark: | The project uses Object Oriented Programming techniques. | The project code is organized into classes with class attributes to hold the data, and class methods to perform tasks. | See SpriteComponent class in spritecomponent.h, see EntityManager class in entitymanager.h, see AssetManager class in assetmanager.h, and it's the case for all the classes defined in the project |
+| :heavy_check_mark: | Classes use appropriate access specifiers for class members. | All class data members are explicitly specified as public, protected, or private.| See Game class in game.h, see Component class in component.h, all the classes defined in the project respect this criteria |
+| :heavy_check_mark: | Class constructors utilize member initialization lists. | All class members that are set to argument values are initialized through member initialization lists.| See Map:Map(...) constructor (line 10) in map.cpp, see Entity::Entity(...) constructor (line 8) in entity.cpp |
+| :heavy_check_mark: | Classes abstract implementation details from their interfaces. | All class member functions document their effects, either through function names, comments, or formal documentation. Member functions do not change program state in undocumented ways.| See SpriteComponent class in spritecomponent.h and spritecomponent.cpp, see EntityManager class in entitymanager.h and entitymanager.cpp, all the classes defined in the project respect this criteria |
+| :heavy_check_mark: | Classes encapsulate behavior. | Appropriate data and functions are grouped into classes. Member data that is subject to an invariant is hidden from the user. State is accessed via member functions.| See Game class in game.h and game.cpp, EntityManager Class in entitymanager.h and entitymanager.cpp, all the classes defined in the project respect this criteria |
+| :heavy_check_mark: | Classes follow an appropriate inheritance hierarchy. | Inheritance hierarchies are logical. Composition is used instead of inheritance when appropriate. Abstract classes are composed of pure virtual functions. Override functions are specified.| See Component Class in component.h and all components classes derived from it (SpriteComponent, BulletEmitterComponent, ColliderComponent, KeyboardControlComponent, etc...) |
+| :heavy_check_mark: | Overloaded functions allow the same function to operate on different parameters. | One function is overloaded with different signatures for the same function name. | See EntityManager::GetLock(...) function with two behavior with two signatures see line 35 and 36 in entitymanager.h |
+| :heavy_check_mark: | Derived class functions override virtual base class functions. |One member function in an inherited class overrides a virtual base class member function.| See TransFormComponent::Update(...) class (line 16) in transformcomponent.h |
+| :heavy_check_mark: | Templates generalize functions in the project. | One function is declared with a template that allows it to accept a generic parameter.| See Entity::AddComponent(...) (line 33) in entity.h and Entity::GetComponent() (line 49) in entity.h |
 
 __Memory Management__
 
 |DONE | CRITERIA | MEETS SPECIFICATIONS| WHERE |
 |-- | -- | --| -- |
-| :heavy_check_mark: | The project makes use of references in function declarations. | At least two variables are defined as references, or two functions use pass-by-reference in the project code.|Extensively done so in multiple functions in object_detector.h |
-| :heavy_check_mark: | The project uses destructors appropriately. | At least one class that uses unmanaged dynamically allocated memory, along with any class that otherwise needs to modify state upon the termination of an object, uses a destructor. | input.h for class Input|
-|  | The project uses scope / Resource Acquisition Is Initialization (RAII) where appropriate. | The project follows the Resource Acquisition Is Initialization pattern where appropriate, by allocating objects at compile-time, initializing objects when they are declared, and utilizing scope to ensure their automatic destruction.| |
-| :heavy_check_mark: | The project follows the Rule of 5. | For all classes, if any one of the copy constructor, copy assignment operator, move constructor, move assignment operator, and destructor are defined, then all of these functions are defined.| Done in object_detector.h for class ObjectDetector |
-| :heavy_check_mark: | The project uses move semantics to move data, instead of copying it, where possible. | For classes with move constructors, the project returns objects of that class by value, and relies on the move constructor, instead of copying the object. | Done in object_detector.cpp for class ObjectDetector  |
-| :heavy_check_mark: | The project uses smart pointers instead of raw pointers. | The project uses at least one smart pointer: unique_ptr, shared_ptr, or weak_ptr. The project does not use raw pointers.| used in main.cpp |
+| :heavy_check_mark: | The project makes use of references in function declarations. | At least two variables are defined as references, or two functions use pass-by-reference in the project code.| See EntityManager::AddEntity function (line 30) entitymanager.h, see TextLabelComponent::SetLabelText(...) (line 19) in textlabelcomponent.h, see FontManager::LoadFont(...) (line 12) in fontmanager.h |
+| :heavy_check_mark: | The project uses destructors appropriately. | At least one class that uses unmanaged dynamically allocated memory, along with any class that otherwise needs to modify state upon the termination of an object, uses a destructor. | See Game::~Game() destructor (line 23) in game.cpp, see EntityManager::~EntityManager() destructor (line 12) in entitymanager.cpp |
+| :heavy_check_mark: | The project uses scope / Resource Acquisition Is Initialization (RAII) where appropriate. | The project follows the Resource Acquisition Is Initialization pattern where appropriate, by allocating objects at compile-time, initializing objects when they are declared, and utilizing scope to ensure their automatic destruction.| See EntityManager::Render() (line 38) in entitymanager.cpp |
+| | The project follows the Rule of 5. | For all classes, if any one of the copy constructor, copy assignment operator, move constructor, move assignment operator, and destructor are defined, then all of these functions are defined.| |
+| | The project uses move semantics to move data, instead of copying it, where possible. | For classes with move constructors, the project returns objects of that class by value, and relies on the move constructor, instead of copying the object. | |
+| :heavy_check_mark: | The project uses smart pointers instead of raw pointers. | The project uses at least one smart pointer: unique_ptr, shared_ptr, or weak_ptr. The project does not use raw pointers.| See EntityManager Class using shared_ptr for the entities vector (line 45) in entitymanager.h, See Game Class useing unique_ptr for SDL ressources (renderer and window) (line 45 and line 47) in game.h, no raw pointers are use and were mostly replace by smart pointers including SDL ressources pointers. |
 
 __Concurrency__
 
 |DONE | CRITERIA | MEETS SPECIFICATIONS| WHERE |
 |-- | -- | --| -- |
-| | The project uses multithreading. | The project uses multiple threads in the execution.| |
+| :heavy_check_mark: | The project uses multithreading. | The project uses multiple threads in the execution.| See EntityManager::SimulateCollisions() (line 50) in entitymanager.cpp (thread is used for collisions detection) |
 |  | A promise and future is used in the project. | A promise and future is used to pass data from a worker thread to a parent thread in the project code.| |
-| :heavy_check_mark: | A mutex or lock is used in the project. | A mutex or lock (e.g. std::lock_guard or `std::unique_lock) is used to protect data that is shared across multiple threads in the project code.| used in Buffer extensively |
+| :heavy_check_mark: | A mutex or lock is used in the project. | A mutex or lock (e.g. std::lock_guard or `std::unique_lock) is used to protect data that is shared across multiple threads in the project code.| Used in EntityManager Class (line 29, 41, 61 and 77) in entitymanager.cpp, see Entity Class (line 35) in entity.h |
 |  | A condition variable is used in the project. | A std::condition_variable is used in the project code to synchronize thread execution.| |

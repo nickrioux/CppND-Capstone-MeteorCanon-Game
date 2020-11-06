@@ -15,23 +15,23 @@ class TransformComponent: public Component {
 
         void Update(float deltaTime) override;
 
-        const glm::vec2 & GetPosition() const {return(_position);}
-        const glm::vec2 & GetVelocity() const {return(_velocity);}
-        int GetWidth() const { return(_width);}
-        int GetHeight() const { return(_height);}
-        float GetScale() const { return(_scale);}
+        const glm::vec2 & GetPosition() const {return(position_);}
+        const glm::vec2 & GetVelocity() const {return(velocity_);}
+        int GetWidth() const { return(width_);}
+        int GetHeight() const { return(height_);}
+        float GetScale() const { return(scale_);}
 
-        void SetPosition(int x, int y) { _position = glm::vec2(x,y);}
-        void SetVelocity(int x, int y) { _velocity = glm::vec2(x,y);}
-        void SetWidth(int w) { _width = w; }
-        void SetHeight(int h) { _height = h; }
+        void SetPosition(int x, int y) { position_ = glm::vec2(x,y);}
+        void SetVelocity(int x, int y) { velocity_ = glm::vec2(x,y);}
+        void SetWidth(int w) { width_ = w; }
+        void SetHeight(int h) { height_ = h; }
 
     private:
-        glm::vec2 _position;
-        glm::vec2 _velocity;
-        int _width;
-        int _height;
-        float _scale;
+        glm::vec2 position_;
+        glm::vec2 velocity_;
+        int width_;
+        int height_;
+        float scale_;
 };
 
 #endif

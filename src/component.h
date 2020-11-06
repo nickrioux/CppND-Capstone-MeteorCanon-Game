@@ -6,8 +6,6 @@
 
 class Entity;
 
-using std::map;
-
 class Component {
         public :
             virtual ~Component() {};

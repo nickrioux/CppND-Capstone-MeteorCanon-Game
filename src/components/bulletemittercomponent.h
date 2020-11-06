@@ -14,12 +14,12 @@ class BulletEmitterComponent: public Component {
         void Update(float deltaTime) override;
 
     private:
-        std::shared_ptr<TransformComponent> _transform;
-        glm::vec2 _origin;
-        int _speed;
-        int _range;
-        float _angleRad;
-        bool _loop;
+        std::shared_ptr<TransformComponent> transform_;
+        glm::vec2 origin_;
+        int speed_;
+        int range_;
+        float angleRad_;
+        bool loop_;
 };
 
 #endif

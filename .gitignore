@@ -10,3 +10,9 @@ build/
 Astromash
 
 assets/skybox.map2
+
+doc/html/
+
+doc/latex/
+
+doc/UML.eddx

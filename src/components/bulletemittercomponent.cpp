@@ -2,22 +2,22 @@
 
 #include "bulletemittercomponent.h"
 
-BulletEmitterComponent::BulletEmitterComponent(int speed, int angleDeg, int range, bool loop) : _speed(speed), _range(range), 
-                                                                        _angleRad(glm::radians(static_cast<float>(angleDeg))),
-                                                                        _loop(loop) {
+BulletEmitterComponent::BulletEmitterComponent(int speed, int angleDeg, int range, bool loop) : speed_(speed), range_(range), 
+                                                                        angleRad_(glm::radians(static_cast<float>(angleDeg))),
+                                                                        loop_(loop) {
 
 }
 
 void BulletEmitterComponent::Init()  {
-    _transform = GetOwner()->GetComponent<TransformComponent>();
-    _origin = glm::vec2(_transform->GetPosition().x, _transform->GetPosition().y);
-    _transform->SetVelocity(glm::cos(_angleRad) * _speed, glm::sin(_angleRad) * _speed); 
+    transform_ = GetOwner()->GetComponent<TransformComponent>();
+    origin_ = glm::vec2(transform_->GetPosition().x, transform_->GetPosition().y);
+    transform_->SetVelocity(glm::cos(angleRad_) * speed_, glm::sin(angleRad_) * speed_); 
 }
 
 void BulletEmitterComponent::Update(float deltaTime)  {
-    if (glm::distance(_transform->GetPosition(), _origin) > _range) {
-        if (_loop) {
-            _transform->SetPosition(_origin.x, _origin.y);
+    if (glm::distance(transform_->GetPosition(), origin_) > range_) {
+        if (loop_) {
+            transform_->SetPosition(origin_.x, origin_.y);
         } else {
             GetOwner()->Destroy();
         }

@@ -2,39 +2,45 @@
 
 #include "spritecomponent.h"
 
-SpriteComponent::SpriteComponent(const string & filePath, bool isFixed) : _transform(nullptr), _isFixed(isFixed), _animationSpeed(0), _isAnimated(false), _numFrames(0) {
-    SetTexture(filePath);
+SpriteComponent::SpriteComponent(const std::string & textureId, bool isFixed) 
+                : isFixed_{isFixed}, texture_{Game::GetGame().GetAssetManager().GetTexture(textureId)} {
 }
 
-SpriteComponent::SpriteComponent(const std::string & id, int numFrames, int animationSpeed, bool isFixed) : _isAnimated(true), _numFrames(numFrames), _animationSpeed(animationSpeed), _isFixed(isFixed) {
-    SetTexture(id);
+SpriteComponent::SpriteComponent(const std::string & textureId, int numFrames, int animationSpeed, bool isFixed) 
+                : isFixed_{isFixed}, isAnimated_{true}, 
+                  numFrames_{numFrames}, animationSpeed_{animationSpeed},
+                  texture_{Game::GetGame().GetAssetManager().GetTexture(textureId)} {
 }
 
 void SpriteComponent::SetTexture(const std::string & assetTextureId) {
-    _texture = Game::GetGame().GetAssetManager().GetTexture(assetTextureId);
+    texture_ = Game::GetGame().GetAssetManager().GetTexture(assetTextureId);
 }
 
 void SpriteComponent::Init() {
-    _transform = GetOwner()->GetComponent<TransformComponent>();
-    _sourceRectangle.x = 0;
-    _sourceRectangle.y = 0;
-    _sourceRectangle.w = _transform->GetWidth();
-    _sourceRectangle.h = _transform->GetHeight();
+    transform_ = GetOwner()->GetComponent<TransformComponent>();
+    sourceRectangle_.x = 0;
+    sourceRectangle_.y = 0;
+    sourceRectangle_.w = transform_->GetWidth();
+    sourceRectangle_.h = transform_->GetHeight();
+    destinationRectangle_.x = static_cast<int>(transform_->GetPosition().x) - (isFixed_ ? 0 : Game::GetGame().GetCamera().x);
+    destinationRectangle_.y = static_cast<int>(transform_->GetPosition().y) - (isFixed_ ? 0 : Game::GetGame().GetCamera().y);
+    destinationRectangle_.w = transform_->GetWidth() * transform_->GetScale();
+    destinationRectangle_.h = transform_->GetHeight() * transform_->GetScale();
 }
 
 void SpriteComponent::Update(float deltaTime)  {
 
-    if (_isAnimated) {
-        _sourceRectangle.x = _sourceRectangle.w * static_cast<int>((SDL_GetTicks() / _animationSpeed) % _numFrames);
+    if (isAnimated_) {
+        sourceRectangle_.x = sourceRectangle_.w * static_cast<int>((SDL_GetTicks() / animationSpeed_) % numFrames_);
     }
 
-    _destinationRectangle.x = static_cast<int>(_transform->GetPosition().x) - (_isFixed ? 0 : Game::GetGame().GetCamera().x);
-    _destinationRectangle.y = static_cast<int>(_transform->GetPosition().y) - (_isFixed ? 0 : Game::GetGame().GetCamera().y);
+    destinationRectangle_.x = static_cast<int>(transform_->GetPosition().x) - (isFixed_ ? 0 : Game::GetGame().GetCamera().x);
+    destinationRectangle_.y = static_cast<int>(transform_->GetPosition().y) - (isFixed_ ? 0 : Game::GetGame().GetCamera().y);
 
-    _destinationRectangle.w = _transform->GetWidth() * _transform->GetScale();
-    _destinationRectangle.h = _transform->GetHeight() * _transform->GetScale();
+    destinationRectangle_.w = transform_->GetWidth() * transform_->GetScale();
+    destinationRectangle_.h = transform_->GetHeight() * transform_->GetScale();
 }
 
 void SpriteComponent::Render() {
-    TextureManager::Draw(_texture, _sourceRectangle, _destinationRectangle, _spriteFlip);
+    TextureManager::Draw(texture_, sourceRectangle_, destinationRectangle_, spriteFlip_);
 }

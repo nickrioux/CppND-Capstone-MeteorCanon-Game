@@ -15,31 +15,31 @@
 
 #include "game.h"
 
-Game::Game() :  _gen(_rd()), _sdl_window(nullptr,SDL_DestroyWindow), _sdl_renderer(nullptr,SDL_DestroyRenderer),
-                _entityManager(std::make_unique<EntityManager>()), _assetManager(std::make_unique<AssetManager>()) {
+Game::Game() :  gen_(rd_()), sdl_window_(nullptr,SDL_DestroyWindow), sdl_renderer_(nullptr,SDL_DestroyRenderer),
+                entityManager_(std::make_unique<EntityManager>()), assetManager_(std::make_unique<AssetManager>()) {
 
 }
 
 Game::~Game() {
     //Implicit call destruction for the window and renderer object before SDL_Quit
-    _sdl_window.reset(nullptr);
-    _sdl_renderer.reset(nullptr);
+    sdl_window_.reset(nullptr);
+    sdl_renderer_.reset(nullptr);
     SDL_Quit();
 }
 
 void Game::Init(int width, int height) {
     
-    _width = width;
-    _height = height;
+    width_ = width;
+    height_ = height;
 
-    _camera = {0, 0, _width, _height};
+    camera_ = {0, 0, width_, height_};
 
-    _random_degree_left = std::uniform_int_distribution<>(90,105);
-    _random_degree_right = std::uniform_int_distribution<>(85,90);
-    _random_speed  = std::uniform_int_distribution<>(20,100);
-    _random_pos_w  = std::uniform_int_distribution<>(0,_width);
-    _random_meteor  = std::uniform_int_distribution<>(0,10);
-    _random = std::uniform_int_distribution<>();
+    random_degree_left_ = std::uniform_int_distribution<>(90,105);
+    random_degree_right_ = std::uniform_int_distribution<>(85,90);
+    random_speed_  = std::uniform_int_distribution<>(20,100);
+    random_pos_w_  = std::uniform_int_distribution<>(0,width_);
+    random_meteor_  = std::uniform_int_distribution<>(0,10);
+    random_ = std::uniform_int_distribution<>();
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         std::cerr << "Error initializing SDL." << std::endl;
@@ -51,28 +51,31 @@ void Game::Init(int width, int height) {
         return;
     }
 
-    _sdl_window.reset(SDL_CreateWindow(
+    sdl_window_.reset(SDL_CreateWindow(
         NULL,
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        _width,
-        _height,
+        width_,
+        height_,
         SDL_WINDOW_BORDERLESS
     ));
 
-    if (!_sdl_window.get()) {
+    if (!sdl_window_.get()) {
         std::cerr << "Error creating SDL window." << std::endl;
         return;
     }
 
-    _sdl_renderer.reset(SDL_CreateRenderer(_sdl_window.get(), -1, 0));
+    sdl_renderer_.reset(SDL_CreateRenderer(sdl_window_.get(), -1, 0));
 
-    if (!_sdl_renderer.get()) {
+    if (!sdl_renderer_.get()) {
         std::cerr << "Error creating SDL renderer." << std::endl;
         return;
     }
 
     loadGame();
+
+    //Start Collisions Detection Thread
+    GetEntityManager().SimulateCollisions();
 
     return;
 }
@@ -84,18 +87,20 @@ void Game::Run(std::size_t target_frame_duration) {
         update(target_frame_duration);
         render();
   }
-
-  std::cout << "Falling Objects : " << _fallingObjects << std::endl;   
 }
 
 int Game::GetScore() const {
-  return _score;
+  return score_;
+}
+
+void Game::BulletEvent() {
+    eventBullet_ = true;
 }
 
 void Game::loadGame() {
     //Init Score and Level
-    _score = 0;
-    _currLevel = 1;
+    score_ = 0;
+    currLevel_ = 1;
 
     //Load Textures
     GetAssetManager().AddTexture("skybox1","../assets/skybox-level1.png");
@@ -124,55 +129,53 @@ void Game::loadGame() {
     GetAssetManager().AddTexture("small-spinner","../assets/small-spinner.png");
     GetAssetManager().AddTexture("big-spinner","../assets/big-spinner.png");
 
-
-
     //Load Fonts
     GetAssetManager().AddFont("charriot-font","../assets/fonts/charriot.ttf",64);
 
     //Load Map
-    _map = std::make_unique<Map>("skybox1",GameConstants::kScaleGame,GameConstants::kMapTileSize);
-    _map->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
+    map_ = std::make_unique<Map>("skybox1",GameConstants::kScaleGame,GameConstants::kMapTileSize);
+    map_->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
 
     //Init Player
     restartPlayer();
 
     std::shared_ptr<Entity> entity = GetEntityManager().AddEntity("left_boundary",GameConstants::CollideEntity,GameConstants::PlayerLayer);
-    entity->AddComponent<TransformComponent>(GameConstants::LeftBoundaryDeltaX,0,0,0,GameConstants::LeftBoundarySize,_height,GameConstants::kScaleGame);
-    entity->AddComponent<ColliderComponent>(GameConstants::LeftBoundaryTag,GameConstants::LeftBoundaryDeltaX,0,GameConstants::LeftBoundarySize,_height);
+    entity->AddComponent<TransformComponent>(GameConstants::LeftBoundaryDeltaX,0,0,0,GameConstants::LeftBoundarySize,height_,GameConstants::kScaleGame);
+    entity->AddComponent<ColliderComponent>(GameConstants::LeftBoundaryTag,GameConstants::LeftBoundaryDeltaX,0,GameConstants::LeftBoundarySize,height_);
 
     entity = GetEntityManager().AddEntity("right_boundary",GameConstants::CollideEntity,GameConstants::PlayerLayer);
-    entity->AddComponent<TransformComponent>(_width,0,0,0,GameConstants::RightBoundarySize,_height,GameConstants::kScaleGame);
-    entity->AddComponent<ColliderComponent>(GameConstants::RightBoundaryTag,_width,0,GameConstants::RightBoundarySize,_height);
+    entity->AddComponent<TransformComponent>(width_,0,0,0,GameConstants::RightBoundarySize,height_,GameConstants::kScaleGame);
+    entity->AddComponent<ColliderComponent>(GameConstants::RightBoundaryTag,width_,0,GameConstants::RightBoundarySize,height_);
 
     entity= GetEntityManager().AddEntity("ground",GameConstants::CollideEntity,GameConstants::PlayerLayer);
-    entity->AddComponent<TransformComponent>(0,_height+GameConstants::GroundDeltaY,0,0,_width,GameConstants::GroundSize,GameConstants::kScaleGame);
-    entity->AddComponent<ColliderComponent>(GameConstants::GroundTag,0,_height+GameConstants::GroundDeltaY,_width,GameConstants::GroundSize);
+    entity->AddComponent<TransformComponent>(0,height_+GameConstants::GroundDeltaY,0,0,width_,GameConstants::GroundSize,GameConstants::kScaleGame);
+    entity->AddComponent<ColliderComponent>(GameConstants::GroundTag,0,height_+GameConstants::GroundDeltaY,width_,GameConstants::GroundSize);
 
-    _scoreLabel = GetEntityManager().AddEntity("scoreLabel",GameConstants::UIEntity,GameConstants::UILayer);
-    _scoreLabel->AddComponent<TextLabelComponent>(GameConstants::ScoreLabelX,_height+GameConstants::ScoreLabelDeltaY,"", "charriot-font", GameConstants::kWhiteColor);
+    scoreLabel_ = GetEntityManager().AddEntity("scoreLabel",GameConstants::UIEntity,GameConstants::UILayer);
+    scoreLabel_->AddComponent<TextLabelComponent>(GameConstants::ScoreLabelX,height_+GameConstants::ScoreLabelDeltaY,"", "charriot-font", GameConstants::kWhiteColor);
 
-    _levelLabel = GetEntityManager().AddEntity("levelLabel",GameConstants::UIEntity,GameConstants::UILayer);
-    _levelLabel->AddComponent<TextLabelComponent>(_width+GameConstants::LevelLabelDeltaX,_height+GameConstants::LevelLabelDeltaY,"","charriot-font", GameConstants::kWhiteColor);
+    levelLabel_ = GetEntityManager().AddEntity("levelLabel",GameConstants::UIEntity,GameConstants::UILayer);
+    levelLabel_->AddComponent<TextLabelComponent>(width_+GameConstants::LevelLabelDeltaX,height_+GameConstants::LevelLabelDeltaY,"","charriot-font", GameConstants::kWhiteColor);
 
-    _lifeLabel = GetEntityManager().AddEntity("lifeLabel",GameConstants::UIEntity, GameConstants::UILayer);
-    _lifeLabel->AddComponent<TextLabelComponent>(_width/2, _height+GameConstants::LifeLabelDeltaY,"","charriot-font", GameConstants::kWhiteColor);
-    _lifeSprite = GetEntityManager().AddEntity("lifeSprite",GameConstants::UIEntity, GameConstants::UILayer);
-    _lifeSprite->AddComponent<TransformComponent>(  _width/2+GameConstants::LifeSpriteDeltaX, _height+GameConstants::LifeSpriteDeltaY,0,0,GameConstants::LifeSpriteSize,
+    lifeLabel_ = GetEntityManager().AddEntity("lifeLabel",GameConstants::UIEntity, GameConstants::UILayer);
+    lifeLabel_->AddComponent<TextLabelComponent>(width_/2, height_+GameConstants::LifeLabelDeltaY,"","charriot-font", GameConstants::kWhiteColor);
+    lifeSprite_ = GetEntityManager().AddEntity("lifeSprite",GameConstants::UIEntity, GameConstants::UILayer);
+    lifeSprite_->AddComponent<TransformComponent>(  width_/2+GameConstants::LifeSpriteDeltaX, height_+GameConstants::LifeSpriteDeltaY,0,0,GameConstants::LifeSpriteSize,
                                                     GameConstants::LifeSpriteSize,GameConstants::kScaleGame);   
-    _lifeSprite->AddComponent<SpriteComponent>("canon-life"); 
+    lifeSprite_->AddComponent<SpriteComponent>("canon-life"); 
 }
 
 void Game::processInput() {
 
-    SDL_PollEvent(&_event);
+    SDL_PollEvent(&event_);
     switch (GetEvent().type) {
         case SDL_QUIT: {
-            _runningStatus = false;
+            runningStatus_ = false;
             break;
         }
         case SDL_KEYDOWN: {
             if (GetEvent().key.keysym.sym == SDLK_ESCAPE) {
-                _runningStatus = false;
+                runningStatus_ = false;
             }
         }
         default: {
@@ -183,29 +186,29 @@ void Game::processInput() {
 }
 
 void Game::update(std::size_t target_frame_duration ) {
-    static int gameState = GameConstants::GameState::Running;
-    
+
     // Wait until 16ms has ellapsed since the last frame
-    int delayTime = target_frame_duration - (SDL_GetTicks() - _ticksLastFrame);
+    int delayTime = target_frame_duration - (SDL_GetTicks() - ticksLastFrame_);
     
     if (delayTime > 0 && delayTime <= target_frame_duration) {
         SDL_Delay(delayTime);
     }
 
     // Delta time is the difference in ticks from last frame converted to secomds
-    float deltaTime = (SDL_GetTicks() - _ticksLastFrame) / 1000.0f;
+    float deltaTime = (SDL_GetTicks() - ticksLastFrame_) / 1000.0f;
 
     // Clamp deltaTime to a maximum value
     deltaTime = (deltaTime > 0.05f) ? 0.05f : deltaTime;
 
     // Sets the new ticks for the current frame to be used in the next pass
-    _ticksLastFrame = SDL_GetTicks();
+    ticksLastFrame_ = SDL_GetTicks();
 
+    //Update Entities
     GetEntityManager().Update(deltaTime * GetSpeedFactor());
 
     handleCameraMovement();
 
-    if (gameState == GameConstants::GameState::Running) {
+    if (gameState_ == GameConstants::GameState::Running) {
 
         //Check Collisions
         checkCollisions();
@@ -216,7 +219,7 @@ void Game::update(std::size_t target_frame_duration ) {
         //Update Lifes
         updateLife();
 
-        //Generate Bullet
+        //Generate Bullet - Check if bullet event is triggered and generate a bullet
         generateBullet();
 
         //Generate Meteor
@@ -226,14 +229,14 @@ void Game::update(std::size_t target_frame_duration ) {
         generateSpinner(deltaTime);
 
         //Player Restart
-        if (_ticksLastKill != 0)
+        if (ticksLastKill_ != 0)
         {
-                float killDeltaTime = (_ticksLastFrame - _ticksLastKill)/1000.0f;
+                float killDeltaTime = (ticksLastFrame_ - ticksLastKill_)/1000.0f;
 
-                _speedFactor = GameConstants::kSpeedFactorKillTransition;
+                speedFactor_ = GameConstants::kSpeedFactorKillTransition;
 
                 if (killDeltaTime > GameConstants::kTimeRestartPlayer) {
-                    _ticksLastKill = 0;
+                    ticksLastKill_ = 0;
                     restartPlayer();
                 }
         }
@@ -242,113 +245,105 @@ void Game::update(std::size_t target_frame_duration ) {
     //Update UI
     updateUI();
 
-    if ((_ticksLastKill == 0) && (_lifes == 0) && (gameState == GameConstants::GameState::Running)) //GameOver
+    //Game Over
+    if ((ticksLastKill_ == 0) && (lifes_ == 0) && (gameState_ == GameConstants::GameState::Running)) //GameOver
     {
-        std::cout << "Game Over!\n";
-        gameState = GameConstants::GameState::GameOver;
-
-        _speedFactor = GameConstants::kSpeedFactorLevel1;
-
-        std::shared_ptr<Entity> gameOverLabel = GetEntityManager().AddEntity("gameOverLabel", GameConstants::UIEntity, GameConstants::UILayer);
-        gameOverLabel->AddComponent<TextLabelComponent>(_width/3,_height/3,"GAME OVER!","charriot-font", GameConstants::kWhiteColor);
+        gameState_ = GameConstants::GameState::GameOver;
+        speedFactor_ = GameConstants::kSpeedFactorLevel1;
+        gameOverLabel_ = GetEntityManager().AddEntity("gameOverLabel", GameConstants::UIEntity, GameConstants::UILayer);
+        gameOverLabel_->AddComponent<TextLabelComponent>(width_/3,height_/3,"GAME OVER!","charriot-font", GameConstants::kWhiteColor);
     }
 
 }
 
 void Game::updateLevel() {
 
-    if (_score >= GameConstants::Level6) {  
+    if (score_ >= GameConstants::Level6) {  
         
-        if (_currLevel !=6) {
+        if (currLevel_ !=6) {
             //Change Map
-            _map = std::make_unique<Map>("skybox6",GameConstants::kScaleGame,GameConstants::kMapTileSize);
-            _map->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
+            map_ = std::make_unique<Map>("skybox6",GameConstants::kScaleGame,GameConstants::kMapTileSize);
+            map_->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
         }
 
-        _currLevel = 6;
-        _speedFactor = GameConstants::kSpeedFactorLevel6;
+        currLevel_ = 6;
+        speedFactor_ = GameConstants::kSpeedFactorLevel6;
     }
-    else if (_score >= GameConstants::Level5) {
-        if (_currLevel != 5) {
+    else if (score_ >= GameConstants::Level5) {
+        if (currLevel_ != 5) {
             //Change Map
-            _map = std::make_unique<Map>("skybox5",GameConstants::kScaleGame,GameConstants::kMapTileSize);
-            _map->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
+            map_ = std::make_unique<Map>("skybox5",GameConstants::kScaleGame,GameConstants::kMapTileSize);
+            map_->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
         }
 
-        _currLevel = 5;
-        _speedFactor = GameConstants::kSpeedFactorLevel5;
+        currLevel_ = 5;
+        speedFactor_ = GameConstants::kSpeedFactorLevel5;
     }
-    else if (_score >= GameConstants::Level4) {
-        if (_currLevel != 4) {
+    else if (score_ >= GameConstants::Level4) {
+        if (currLevel_ != 4) {
             //Change Map
-            _map = std::make_unique<Map>("skybox4",GameConstants::kScaleGame,GameConstants::kMapTileSize);
-            _map->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
+            map_ = std::make_unique<Map>("skybox4",GameConstants::kScaleGame,GameConstants::kMapTileSize);
+            map_->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
         }
 
-        _currLevel = 4;
-        _speedFactor = GameConstants::kSpeedFactorLevel4;
+        currLevel_ = 4;
+        speedFactor_ = GameConstants::kSpeedFactorLevel4;
     }
-    else if (_score >= GameConstants::Level3) {
-        if (_currLevel != 3) {
+    else if (score_ >= GameConstants::Level3) {
+        if (currLevel_ != 3) {
             //Change Map
-            _map = std::make_unique<Map>("skybox3",GameConstants::kScaleGame,GameConstants::kMapTileSize);
-            _map->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
+            map_ = std::make_unique<Map>("skybox3",GameConstants::kScaleGame,GameConstants::kMapTileSize);
+            map_->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
         }
-        _currLevel = 3;
-        _speedFactor = GameConstants::kSpeedFactorLevel3;
+        currLevel_ = 3;
+        speedFactor_ = GameConstants::kSpeedFactorLevel3;
     }
-    else if (_score >= GameConstants::Level2) {        
-        if (_currLevel != 2) {
+    else if (score_ >= GameConstants::Level2) {        
+        if (currLevel_ != 2) {
             //Change Map
-            _map = std::make_unique<Map>("skybox2",GameConstants::kScaleGame,GameConstants::kMapTileSize);
-            _map->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
+            map_ = std::make_unique<Map>("skybox2",GameConstants::kScaleGame,GameConstants::kMapTileSize);
+            map_->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
         }
 
-        _currLevel = 2;
-        _speedFactor = GameConstants::kSpeedFactorLevel2;
+        currLevel_ = 2;
+        speedFactor_ = GameConstants::kSpeedFactorLevel2;
     }
     else {
-        if (_currLevel != 1) {
+        if (currLevel_ != 1) {
             //Change Map
-            _map = std::make_unique<Map>("skybox1",GameConstants::kScaleGame,GameConstants::kMapTileSize);
-            _map->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight
-            );
+            map_ = std::make_unique<Map>("skybox1",GameConstants::kScaleGame,GameConstants::kMapTileSize);
+            map_->LoadMap("../assets/skybox1.map",GameConstants::kMapWidth,GameConstants::kMapHeight);
         }
 
-        _currLevel = 1;
-        _speedFactor = GameConstants::kSpeedFactorLevel1;
+        currLevel_ = 1;
+        speedFactor_ = GameConstants::kSpeedFactorLevel1;
     }
 }
 
 void Game::updateUI() {
-  std::shared_ptr<TextLabelComponent> scoreLabel = _scoreLabel->GetComponent<TextLabelComponent>();
-  std::shared_ptr<TextLabelComponent> levelLabel = _levelLabel->GetComponent<TextLabelComponent>();
-  std::shared_ptr<TextLabelComponent> lifeLabel = _lifeLabel->GetComponent<TextLabelComponent>();
+  std::shared_ptr<TextLabelComponent> scoreLabel = scoreLabel_->GetComponent<TextLabelComponent>();
+  std::shared_ptr<TextLabelComponent> levelLabel = levelLabel_->GetComponent<TextLabelComponent>();
+  std::shared_ptr<TextLabelComponent> lifeLabel = lifeLabel_->GetComponent<TextLabelComponent>();
 
-  string score = std::to_string(_score);
+  std::string score = std::to_string(score_);
   scoreLabel->SetLabelText(score,"charriot-font");
 
-  string level = std::to_string(_currLevel) + "x";
+  std::string level = std::to_string(currLevel_) + "x";
   levelLabel->SetLabelText(level,"charriot-font");
 
-  string life = std::to_string(_lifes) + "x";
+  std::string life = std::to_string(lifes_) + "x";
   lifeLabel->SetLabelText(life,"charriot-font");
 }
 
+//The Camera is fixed for this game.
 void Game::handleCameraMovement() {
-    _camera.x = 0;
-    _camera.y = 0;
-    _camera.x = _camera.x < 0 ? 0 : _camera.x;
-    _camera.y = _camera.y < 0 ? 0 : _camera.y;
-    _camera.x = _camera.x > _camera.w ? _camera.w : _camera.x;
-    _camera.y = _camera.y > _camera.h ? _camera.h : _camera.y;
+    camera_.x = 0;
+    camera_.y = 0;
 }
 
 void Game::checkCollisions() {
-
-    GetEntityManager().CheckCollisions();
     
-    vector<EntityManager::CollisionData> collisions;
+    std::vector<EntityManager::CollisionData> collisions;
     
     collisions =  GetEntityManager().GetCollisions();
     
@@ -361,113 +356,71 @@ void Game::checkCollisions() {
             if (collisionData.entityOne->IsActive() && collisionData.entityTwo->IsActive()) {
 
                 switch(collisionData.collisionType) {
-                case GameConstants::PlayerMeteor:
-                    generateExplosion(_player->GetComponent<TransformComponent>()->GetPosition(),_player->GetEntityType());
-                    collisionData.entityOne->Destroy();
-                    collisionData.entityTwo->Destroy();
-                    killPlayer();
-                    _fallingObjects--;
-                    break;
-                case GameConstants::PlayerLeftBoundary:
-                case GameConstants::PlayerRightBoundary:
-                    adjustCanonPosition(collisionData.collisionType);
-                    break;
-                case GameConstants::MeteorGround:
-                    if (collisionData.entityOne->GetEntityType() == GameConstants::CollideEntity) {
-
-                        if (collisionData.entityTwo->GetEntityType() == GameConstants::BigMeteorEntity)
-                        {
-                            _score += GameConstants::BigRockLandingScore * _currLevel;
-                        }
-                        else
-                        {
-                            _score += GameConstants::SmallRockLandingScore * _currLevel;
-                        }
-
-                        generateExplosion(collisionData.entityTwo->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityTwo->GetEntityType());
-                        
-                        collisionData.entityTwo->Destroy();
-                    }
-                    else
-                    {
-                        if (collisionData.entityOne->GetEntityType() == GameConstants::BigMeteorEntity)
-                        {
-                            _score += GameConstants::BigRockLandingScore * _currLevel;
-                        }
-                        else
-                        {
-                            _score += GameConstants::SmallRockLandingScore * _currLevel;
-                        }
-
-                        generateExplosion(collisionData.entityOne->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityOne->GetEntityType());
-
+                    case GameConstants::PlayerMeteor:
+                        generateExplosion(player_->GetComponent<TransformComponent>()->GetPosition(),player_->GetEntityType());
                         collisionData.entityOne->Destroy();
-                    }
-
-                    _fallingObjects--;
-
-                    break;
-                case GameConstants::EnemyBullet:
-                    if (collisionData.entityOne->GetEntityType() == GameConstants::BulletEntity)
-                    {
-                        switch(collisionData.entityTwo->GetEntityType()) {
-                            case GameConstants::BigMeteorEntity:
-                            case GameConstants::SmallMeteorEntity:
-                                processMeteorExplode(collisionData.entityTwo);
-                                _fallingObjects--;
-                                break;
-                            case GameConstants::SmallSpinnerEntity:
-                                _score += GameConstants::SmallSpinnerScore * _currLevel;
-                                generateExplosion(collisionData.entityTwo->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityTwo->GetEntityType());
-                                _fallingObjects--;
-                                break;
-                            case GameConstants::BigSpinnerEntity:
-                                _score += GameConstants::BigSpinnerScore * _currLevel;
-                                generateExplosion(collisionData.entityTwo->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityTwo->GetEntityType());
-                                _fallingObjects--;
-                                break;
-                            default:
-                                break;
-                        };
-                    }
-                    else
-                    {
-                        switch(collisionData.entityOne->GetEntityType()) {
-                            case GameConstants::BigMeteorEntity:
-                            case GameConstants::SmallMeteorEntity:
-                                processMeteorExplode(collisionData.entityOne);
-                                _fallingObjects--;
-                                break;
-                            case GameConstants::SmallSpinnerEntity:
-                                _score += GameConstants::SmallSpinnerScore;
-                                generateExplosion(collisionData.entityOne->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityOne->GetEntityType());
-                                _fallingObjects--;
-                                break;
-                            case GameConstants::BigSpinnerEntity:
-                                _score += GameConstants::BigSpinnerScore;
-                                generateExplosion(collisionData.entityOne->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityOne->GetEntityType());
-                                _fallingObjects--;
-                                break;
-                            default:
-                                break;
-                        };
-                    }
-                    collisionData.entityOne->Destroy();
-                    collisionData.entityTwo->Destroy();
-                    break;
-                case GameConstants::FallingObjectBoundary:
-                        if (collisionData.entityOne->GetEntityType() == GameConstants::CollideEntity) {
-                            collisionData.entityTwo->Destroy();
+                        collisionData.entityTwo->Destroy();
+                        killPlayer();
+                        fallingObjects_--;
+                        break;
+                    case GameConstants::PlayerLeftBoundary:
+                    case GameConstants::PlayerRightBoundary:
+                        adjustCanonPosition(collisionData.collisionType);
+                        break;
+                    case GameConstants::MeteorGround: {
+                        std::shared_ptr<Entity> thatEntity = (collisionData.entityOne->GetEntityType() == GameConstants::CollideEntity ? collisionData.entityTwo : collisionData.entityOne);
+                        if (thatEntity->GetEntityType() == GameConstants::BigMeteorEntity)
+                        {
+                            score_ += GameConstants::BigRockLandingScore * currLevel_;
                         }
-                        else if (collisionData.entityTwo->GetEntityType() == GameConstants::CollideEntity) {
-                            collisionData.entityOne->Destroy();
+                        else
+                        {
+                            score_ += GameConstants::SmallRockLandingScore * currLevel_;
                         }
-                        _fallingObjects--;
-                    break;
-                case GameConstants::PlayerSpinner:
-                case GameConstants::SpinnerGround:
-                        _score += GameConstants::LostBaseScore;
-                        generateExplosion(_player->GetComponent<TransformComponent>()->GetPosition(),_player->GetEntityType());
+                        generateExplosion(thatEntity->GetComponent<TransformComponent>()->GetPosition(),thatEntity->GetEntityType());
+                        thatEntity->Destroy();
+                        fallingObjects_--;
+                        break;
+                    };
+                    case GameConstants::EnemyBullet: {
+                        std::shared_ptr<Entity> thatEntity = (collisionData.entityOne->GetEntityType() == GameConstants::BulletEntity ? collisionData.entityTwo : collisionData.entityOne);
+                        switch(thatEntity->GetEntityType()) {
+                                case GameConstants::BigMeteorEntity:
+                                case GameConstants::SmallMeteorEntity:
+                                    processMeteorExplode(thatEntity);
+                                    fallingObjects_--;
+                                    break;
+                                case GameConstants::SmallSpinnerEntity:
+                                    score_ += GameConstants::SmallSpinnerScore * currLevel_;
+                                    generateExplosion(thatEntity->GetComponent<TransformComponent>()->GetPosition(),thatEntity->GetEntityType());
+                                    fallingObjects_--;
+                                    break;
+                                case GameConstants::BigSpinnerEntity:
+                                    score_ += GameConstants::BigSpinnerScore * currLevel_;
+                                    generateExplosion(thatEntity->GetComponent<TransformComponent>()->GetPosition(),thatEntity->GetEntityType());
+                                    fallingObjects_--;
+                                    break;
+                                default:
+                                    break;
+                        };
+                        collisionData.entityOne->Destroy();
+                        collisionData.entityTwo->Destroy();
+                        break;
+                    };
+                    case GameConstants::FallingObjectBoundary:
+                            if (collisionData.entityOne->GetEntityType() == GameConstants::CollideEntity) {
+                                collisionData.entityTwo->Destroy();
+                            }
+                            else if (collisionData.entityTwo->GetEntityType() == GameConstants::CollideEntity) {
+                                collisionData.entityOne->Destroy();
+                            }
+                            fallingObjects_--;
+                        break;
+                    case GameConstants::PlayerSpinner:
+                    case GameConstants::SpinnerGround:
+                        score_ += GameConstants::LostBaseScore;
+                        generateExplosion(player_->GetComponent<TransformComponent>()->GetPosition(),player_->GetEntityType());
+                        
                         if ((collisionData.entityOne->GetEntityType() == GameConstants::SmallSpinnerEntity) || (collisionData.entityOne->GetEntityType() == GameConstants::BigSpinnerEntity)) {
                             generateExplosion(collisionData.entityOne->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityOne->GetEntityType());
                             collisionData.entityOne->Destroy(); //Spinner
@@ -476,8 +429,8 @@ void Game::checkCollisions() {
                             generateExplosion(collisionData.entityTwo->GetComponent<TransformComponent>()->GetPosition(),collisionData.entityTwo->GetEntityType());
                             collisionData.entityTwo->Destroy(); //Spinner
                         }
-                        _fallingObjects--;
-                        _player->Destroy();
+                        fallingObjects_--;
+                        player_->Destroy();
                         killPlayer();
                         break;
                     default:
@@ -493,9 +446,9 @@ void Game::processMeteorExplode (std::shared_ptr<Entity> meteor)
     if (meteor->GetEntityType() == GameConstants::SmallMeteorEntity)
     {
         generateExplosion(meteor->GetComponent<TransformComponent>()->GetPosition(),meteor->GetEntityType());
-        _score += GameConstants::SmallRockScore * _currLevel;
+        score_ += GameConstants::SmallRockScore * currLevel_;
     }    
-    else if (_random(_gen) % 2)
+    else if (random_(gen_) % 2)
     {
         //Generate Two Small Meteor
         glm::vec2 pos = meteor->GetComponent<TransformComponent>()->GetPosition();
@@ -504,12 +457,12 @@ void Game::processMeteorExplode (std::shared_ptr<Entity> meteor)
         glm::vec2 posSmall1 = {pos.x + GameConstants::BigMeteorSizeW * 1/4,pos.y + GameConstants::BigMeteorSizeH/2 - GameConstants::SmallMeteorSizeH/2};
         glm::vec2 posSmall2 = {pos.x + GameConstants::BigMeteorSizeW * 3/4,pos.y + GameConstants::BigMeteorSizeH/2 - GameConstants::SmallMeteorSizeH/2};
         std::uniform_int_distribution<> speedRnd(-40, -20);
-        glm::vec2 speed1 = {speedRnd(_gen), speed.y};
+        glm::vec2 speed1 = {speedRnd(gen_), speed.y};
         glm::vec2 speed2 = {-speed1.x, speed.y};
 
         // Rotate the speeds of the small rocks some times:
-        int dir = _random(_gen) % 3;
-        for (int times = _random(_gen) % 2 + 1; times > 0; times--) {
+        int dir = random_(gen_) % 3;
+        for (int times = random_(gen_) % 2 + 1; times > 0; times--) {
             switch (dir)
             {
                 case 0:
@@ -539,21 +492,17 @@ void Game::processMeteorExplode (std::shared_ptr<Entity> meteor)
         smallRock2->AddComponent<SpriteComponent>(smallRockSpriteName);
         smallRock2->AddComponent<ColliderComponent>(GameConstants::MeteorTag,posSmall2.x,posSmall2.y,GameConstants::SmallMeteorSizeW,GameConstants::SmallMeteorSizeH);
                 
-        _fallingObjects+=2;
+        fallingObjects_+=2;
     }
     else {
         generateExplosion(meteor->GetComponent<TransformComponent>()->GetPosition(),meteor->GetEntityType());
-        _score += GameConstants::BigRockScore * _currLevel;
+        score_ += GameConstants::BigRockScore * currLevel_;
     }
 }
 
-void Game::BulletEvent() {
-    _eventBullet = true;
-}
-
 void Game::generateBullet() {
-    if (_eventBullet) {
-        std::shared_ptr<TransformComponent> transformComp = _player->GetComponent<TransformComponent>();
+    if (eventBullet_) {
+        std::shared_ptr<TransformComponent> transformComp = player_->GetComponent<TransformComponent>();
 
         std::shared_ptr<Entity>  bulletEntity = GetEntityManager().AddEntity("bullet",GameConstants::BulletEntity,GameConstants::BulletLayer);
         bulletEntity->AddComponent<TransformComponent>( transformComp->GetPosition().x+GameConstants::BulletDeltaX,transformComp->GetPosition().y+GameConstants::BulletDeltaY, 0, 
@@ -561,16 +510,16 @@ void Game::generateBullet() {
         bulletEntity->AddComponent<SpriteComponent>("bullet");
         bulletEntity->AddComponent<ColliderComponent>(  GameConstants::BulletTag,transformComp->GetPosition().x+GameConstants::BulletDeltaX,transformComp->GetPosition().y+GameConstants::BulletDeltaY,
                                                         transformComp->GetWidth(),transformComp->GetHeight());
-        bulletEntity->AddComponent<BulletEmitterComponent>(GameConstants::BulletSpeed,GameConstants::kUpAngle,_height+GameConstants::BulletDeltaY,false);
+        bulletEntity->AddComponent<BulletEmitterComponent>(GameConstants::BulletSpeed,GameConstants::kUpAngle,height_+GameConstants::BulletDeltaY,false);
     
-        _eventBullet = false;
+        eventBullet_ = false;
     }
 }
 
 
 void Game::render() {
-    SDL_SetRenderDrawColor(_sdl_renderer.get(), 21, 21, 21, 255);
-    SDL_RenderClear(_sdl_renderer.get());
+    SDL_SetRenderDrawColor(sdl_renderer_.get(), 21, 21, 21, 255);
+    SDL_RenderClear(sdl_renderer_.get());
 
     if (GetEntityManager().HasNoEntities()) {
         std::cout << "NO ENTITIES RENDER\n" << std::endl;
@@ -579,7 +528,7 @@ void Game::render() {
 
     GetEntityManager().Render(); 
 
-    SDL_RenderPresent(_sdl_renderer.get());  
+    SDL_RenderPresent(sdl_renderer_.get());  
 }
 
 void Game::destroy() {
@@ -588,14 +537,14 @@ void Game::destroy() {
 
 void Game::adjustCanonPosition(GameConstants::CollisionType collisionType) {
     
-    std::shared_ptr<TransformComponent> transform = _player->GetComponent<TransformComponent>();
+    std::shared_ptr<TransformComponent> transform = player_->GetComponent<TransformComponent>();
 
     if (collisionType == GameConstants::PlayerLeftBoundary) {
         transform->SetPosition(0,transform->GetPosition().y);
     }
     else if (collisionType == GameConstants::PlayerRightBoundary)
     {
-        transform->SetPosition(_width - transform->GetWidth(), transform->GetPosition().y);
+        transform->SetPosition(width_ - transform->GetWidth(), transform->GetPosition().y);
     }
    
 }
@@ -604,23 +553,23 @@ void Game::generateMeteor(float deltaTime) {
 
     //Each TIME_FREQ_METEOR seconds generate a new Meteor
 
-    _generateMeteorTime += deltaTime * GetSpeedFactor();
+    generateMeteorTime_ += deltaTime * GetSpeedFactor();
 
-    if ((_generateMeteorTime > (GameConstants::kTimeFreqMeteor)) || (_fallingObjects < (GameConstants::kMinFallingObjects * _currLevel))) {
-      int posX = _random_pos_w(_gen);
-      int speed = _random_speed(_gen);
+    if ((generateMeteorTime_ > (GameConstants::kTimeFreqMeteor)) || (fallingObjects_ < (GameConstants::kMinFallingObjects * currLevel_))) {
+      int posX = random_pos_w_(gen_);
+      int speed = random_speed_(gen_);
       float angle{0.0f};
 
-      if (posX <= (_width/2))
+      if (posX <= (width_/2))
       {
-          angle = glm::radians(static_cast<float>(_random_degree_right(_gen)));
+          angle = glm::radians(static_cast<float>(random_degree_right_(gen_)));
       }
       else {
-          angle = glm::radians(static_cast<float>(_random_degree_left(_gen)));
+          angle = glm::radians(static_cast<float>(random_degree_left_(gen_)));
       }
 
       //Determine Random Type and Color of Meteor
-      int type = _random_meteor(_gen);
+      int type = random_meteor_(gen_);
 
       if (type > 5) //Small Rock
       {
@@ -638,31 +587,31 @@ void Game::generateMeteor(float deltaTime) {
           asteroidEntity->AddComponent<ColliderComponent>(GameConstants::MeteorTag,posX,0,GameConstants::BigMeteorSizeW,GameConstants::BigMeteorSizeH);
       }
 
-      _fallingObjects++;
+      fallingObjects_++;
 
-      _generateMeteorTime = 0.0f;
+      generateMeteorTime_ = 0.0f;
     }
 }
 
 void Game::generateSpinner(float deltaTime)
 {
-    _generateSpinnerTime += deltaTime * GetSpeedFactor();
+    generateSpinnerTime_ += deltaTime * GetSpeedFactor();
 
-    if ((_generateSpinnerTime > GameConstants::kTimeFreqSpinner) || (_fallingObjects < (GameConstants::kMinFallingObjects * _currLevel))) {
-            int posX = _random_pos_w(_gen);
-            int speed = _random_speed(_gen);
+    if ((generateSpinnerTime_ > GameConstants::kTimeFreqSpinner) || (fallingObjects_ < (GameConstants::kMinFallingObjects * currLevel_))) {
+            int posX = random_pos_w_(gen_);
+            int speed = random_speed_(gen_);
             float angle{0.0f};
 
-            if (posX <= (_width/2))
+            if (posX <= (width_/2))
             {
-                angle = glm::radians(static_cast<float>(_random_degree_right(_gen)));
+                angle = glm::radians(static_cast<float>(random_degree_right_(gen_)));
             }
             else {
-                angle = glm::radians(static_cast<float>(_random_degree_left(_gen)));
+                angle = glm::radians(static_cast<float>(random_degree_left_(gen_)));
             }
 
             //Determine if it'a a big spinner or small one (Random)
-            int spinnerType = _random(_gen) % 2;
+            int spinnerType = random_(gen_) % 2;
 
             if (spinnerType) {
                 std::shared_ptr<Entity> spinnerEntity = GetEntityManager().AddEntity(GameConstants::kSmallSpinnerName, GameConstants::SmallSpinnerEntity, GameConstants::NpcLayer);
@@ -679,8 +628,8 @@ void Game::generateSpinner(float deltaTime)
             }
             
 
-            _fallingObjects++;
-            _generateSpinnerTime = 0.0f;;
+            fallingObjects_++;
+            generateSpinnerTime_ = 0.0f;;
     }        
 }
 
@@ -705,15 +654,15 @@ void Game::generateExplosion(glm::vec2 pos, const GameConstants::EntityType & en
             explosion2->AddComponent<SpriteComponent>("explosion0");
             explosion2->SetLifeTime(GameConstants::kTimeRestartPlayer);
             
-            explosion3->AddComponent<TransformComponent>(pos.x,pos.y,0,-GameConstants::CanonExplosionHighSpeed,43,43,GameConstants::kScaleGame);
+            explosion3->AddComponent<TransformComponent>(pos.x,pos.y,0,-GameConstants::CanonExplosionHighSpeed,GameConstants::ExplosionSize,GameConstants::ExplosionSize,GameConstants::kScaleGame);
             explosion3->AddComponent<SpriteComponent>("explosion0");
             explosion3->SetLifeTime(GameConstants::kTimeRestartPlayer);
             
-            explosion4->AddComponent<TransformComponent>(pos.x,pos.y,-GameConstants::CanonExplosionLowSpeed,-GameConstants::CanonExplosionLowSpeed,43,43,GameConstants::kScaleGame);
+            explosion4->AddComponent<TransformComponent>(pos.x,pos.y,-GameConstants::CanonExplosionLowSpeed,-GameConstants::CanonExplosionLowSpeed,GameConstants::ExplosionSize,GameConstants::ExplosionSize,GameConstants::kScaleGame);
             explosion4->AddComponent<SpriteComponent>("explosion0");
             explosion4->SetLifeTime(GameConstants::kTimeRestartPlayer);
 
-            explosion5->AddComponent<TransformComponent>(pos.x,pos.y,-GameConstants::CanonExplosionHighSpeed,0,43,43,GameConstants::kScaleGame);
+            explosion5->AddComponent<TransformComponent>(pos.x,pos.y,-GameConstants::CanonExplosionHighSpeed,0,GameConstants::ExplosionSize,GameConstants::ExplosionSize,GameConstants::kScaleGame);
             explosion5->AddComponent<SpriteComponent>("explosion0");
             explosion5->SetLifeTime(GameConstants::kTimeRestartPlayer);
         }
@@ -727,28 +676,28 @@ void Game::generateExplosion(glm::vec2 pos, const GameConstants::EntityType & en
 }
 
 void Game::killPlayer() {
-    _lifes -= 1;
-    _ticksLastKill = SDL_GetTicks();
+    lifes_ -= 1;
+    ticksLastKill_ = SDL_GetTicks();
 }
 
 void Game::restartPlayer() {
-    _player = GetEntityManager().AddEntity("canon",GameConstants::PlayerEntity,GameConstants::PlayerLayer);
-    _player->AddComponent<TransformComponent>(_width/2,_height+GameConstants::CanonDeltaY, 0, 0, GameConstants::CanonSize, GameConstants::CanonSize, GameConstants::kScaleGame);
-    _player->AddComponent<SpriteComponent>("canon");
-    _player->AddComponent<KeyboardControlComponent>("left","right","space");
-    _player->AddComponent<ColliderComponent>(GameConstants::PlayerTag,_width/2,_height-12-32-64,32,32);
+    player_ = GetEntityManager().AddEntity("canon",GameConstants::PlayerEntity,GameConstants::PlayerLayer);
+    player_->AddComponent<TransformComponent>(width_/2,height_+GameConstants::CanonDeltaY, 0, 0, GameConstants::CanonSize, GameConstants::CanonSize, GameConstants::kScaleGame);
+    player_->AddComponent<SpriteComponent>("canon");
+    player_->AddComponent<KeyboardControlComponent>("left","right","space");
+    player_->AddComponent<ColliderComponent>(GameConstants::PlayerTag,width_/2,height_+GameConstants::CanonDeltaY,GameConstants::CanonSize,GameConstants::CanonSize);
 }
 
 void Game::updateLife() {
-        if (_score > 0 && (_score > _maxScore)) {
-                int oldScore = _maxScore;
-                _maxScore = _score;
+        if (score_ > 0 && (score_ > maxScore_)) {
+                int oldScore = maxScore_;
+                maxScore_ = score_;
 
-                bool newLife = ((_maxScore/GameConstants::LifeScore) - (oldScore/GameConstants::LifeScore) > 0 ? true : false);
+                bool newLife = ((maxScore_/GameConstants::LifeScore) - (oldScore/GameConstants::LifeScore) > 0 ? true : false);
 
                 if (newLife) 
                 {
-                    _lifes++;
+                    lifes_++;
                 }
         }
 }

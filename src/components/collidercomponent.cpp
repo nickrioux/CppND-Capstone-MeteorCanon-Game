@@ -2,24 +2,25 @@
 
 #include "collidercomponent.h"
 
-ColliderComponent::ColliderComponent(const GameConstants::ColliderTag & colliderTag, int x, int y, int width, int height) : _colliderTag(colliderTag), _collider({x,y,width,height}) {
+ColliderComponent::ColliderComponent(const GameConstants::ColliderTag & colliderTag, int x, int y, int width, int height) 
+                    : colliderTag_{colliderTag}, collider_({x,y,width,height}) {
 }
 
 void ColliderComponent::Init() {
     if (GetOwner()->HasComponent<TransformComponent>()) {
-        _transform = GetOwner()->GetComponent<TransformComponent>();
-        _collider.w = _transform->GetWidth();
-        _collider.h = _transform->GetHeight();
-        _srcRect = {0, 0, _transform->GetWidth(), _transform->GetHeight()};
-        _destRect = {_collider.x, _collider.y, _collider.w, _collider.h};
+        transform_ = GetOwner()->GetComponent<TransformComponent>();
+        collider_.w = transform_->GetWidth();
+        collider_.h = transform_->GetHeight();
+        srcRect_ = {0, 0, transform_->GetWidth(), transform_->GetHeight()};
+        destRect_ = {collider_.x, collider_.y, collider_.w, collider_.h};
     }
 }
 
 void ColliderComponent::Update(float deltaTime) {
-    _collider.x = static_cast<int>(_transform->GetPosition().x); 
-    _collider.y = static_cast<int>(_transform->GetPosition().y);
-    _collider.w = _transform->GetWidth() * _transform->GetScale();
-    _collider.h = _transform->GetHeight() * _transform->GetScale();
-    _destRect.x = _collider.x - Game::GetGame().GetCamera().x;
-    _destRect.y = _collider.y - Game::GetGame().GetCamera().y;
+    collider_.x = static_cast<int>(transform_->GetPosition().x); 
+    collider_.y = static_cast<int>(transform_->GetPosition().y);
+    collider_.w = transform_->GetWidth() * transform_->GetScale();
+    collider_.h = transform_->GetHeight() * transform_->GetScale();
+    destRect_.x = collider_.x - Game::GetGame().GetCamera().x;
+    destRect_.y = collider_.y - Game::GetGame().GetCamera().y;
 }

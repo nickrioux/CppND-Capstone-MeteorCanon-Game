@@ -19,7 +19,7 @@ class KeyboardControlComponent : public Component {
                                 const std::string & rightKey, 
                                 const std::string & shootKey);
 
-        std::string GetSDLKeyStringCode(std::string key);
+        const std::string GetSDLKeyStringCode(const std::string & key);
 
         void Init() override;
 
@@ -27,10 +27,10 @@ class KeyboardControlComponent : public Component {
 
     private:
 
-        std::string _leftKey;
-        std::string _rightKey;
-        std::string _shootKey;
-        std::shared_ptr<TransformComponent> _transform;
+        std::string leftKey_;
+        std::string rightKey_;
+        std::string shootKey_;
+        std::shared_ptr<TransformComponent> transform_;
 };
 
 #endif
