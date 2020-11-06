@@ -8,6 +8,7 @@
 
 void AssetManager::ClearData() {
     textures_.clear();
+    fonts_.clear();
 }
 
 void AssetManager::AddTexture(std::string textureId, const std::string & filePath) {

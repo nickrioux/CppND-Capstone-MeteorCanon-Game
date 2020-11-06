@@ -251,8 +251,8 @@ void Game::update(std::size_t target_frame_duration ) {
     {
         gameState = GameConstants::GameState::GameOver;
         speedFactor_ = GameConstants::kSpeedFactorLevel1;
-        std::shared_ptr<Entity> gameOverLabel = GetEntityManager().AddEntity("gameOverLabel", GameConstants::UIEntity, GameConstants::UILayer);
-        gameOverLabel->AddComponent<TextLabelComponent>(width_/3,height_/3,"GAME OVER!","charriot-font", GameConstants::kWhiteColor);
+        gameOverLabel_ = GetEntityManager().AddEntity("gameOverLabel", GameConstants::UIEntity, GameConstants::UILayer);
+        gameOverLabel_->AddComponent<TextLabelComponent>(width_/3,height_/3,"GAME OVER!","charriot-font", GameConstants::kWhiteColor);
     }
 
 }
