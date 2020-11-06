@@ -175,7 +175,7 @@ void EntityManager::destroyInactiveEntities() {
     }
 }
 
-std::shared_ptr<Entity> EntityManager::AddEntity(std::string entityName, GameConstants::EntityType entityType, GameConstants::LayerType layerType) {
+std::shared_ptr<Entity> EntityManager::AddEntity(const std::string & entityName, GameConstants::EntityType entityType, GameConstants::LayerType layerType) {
     std::unique_lock<std::mutex> lock = GetLock();
     std::shared_ptr<Entity> entity = std::make_shared<Entity>(*this, entityName, entityType, layerType);
     entities_.emplace_back(entity);

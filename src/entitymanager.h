@@ -27,7 +27,7 @@ class EntityManager {
         void SimulateCollisions();
         std::vector<EntityManager::CollisionData> GetCollisions();
         bool HasNoEntities();
-        std::shared_ptr<Entity> AddEntity(std::string entityName, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
+        std::shared_ptr<Entity> AddEntity(const std::string & entityName, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
         std::vector<std::shared_ptr<Entity>> GetEntitiesByLayer(GameConstants::LayerType layerType) const;
         unsigned int GetEntityCount();
         void ListAllEntities() const;

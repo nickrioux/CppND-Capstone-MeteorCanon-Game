@@ -186,8 +186,7 @@ void Game::processInput() {
 }
 
 void Game::update(std::size_t target_frame_duration ) {
-    static int gameState = GameConstants::GameState::Running;
-    
+
     // Wait until 16ms has ellapsed since the last frame
     int delayTime = target_frame_duration - (SDL_GetTicks() - ticksLastFrame_);
     
@@ -209,7 +208,7 @@ void Game::update(std::size_t target_frame_duration ) {
 
     handleCameraMovement();
 
-    if (gameState == GameConstants::GameState::Running) {
+    if (gameState_ == GameConstants::GameState::Running) {
 
         //Check Collisions
         checkCollisions();
@@ -247,9 +246,9 @@ void Game::update(std::size_t target_frame_duration ) {
     updateUI();
 
     //Game Over
-    if ((ticksLastKill_ == 0) && (lifes_ == 0) && (gameState == GameConstants::GameState::Running)) //GameOver
+    if ((ticksLastKill_ == 0) && (lifes_ == 0) && (gameState_ == GameConstants::GameState::Running)) //GameOver
     {
-        gameState = GameConstants::GameState::GameOver;
+        gameState_ = GameConstants::GameState::GameOver;
         speedFactor_ = GameConstants::kSpeedFactorLevel1;
         gameOverLabel_ = GetEntityManager().AddEntity("gameOverLabel", GameConstants::UIEntity, GameConstants::UILayer);
         gameOverLabel_->AddComponent<TextLabelComponent>(width_/3,height_/3,"GAME OVER!","charriot-font", GameConstants::kWhiteColor);

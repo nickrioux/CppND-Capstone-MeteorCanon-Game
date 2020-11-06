@@ -59,6 +59,7 @@ class Game {
      std::shared_ptr<Entity> gameOverLabel_;
 
      //Game Variables and Status
+     int gameState_{GameConstants::GameState::Running};
      bool eventBullet_{false};
      bool runningStatus_{true};
      int score_{0};
