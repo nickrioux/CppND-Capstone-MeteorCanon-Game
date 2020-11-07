@@ -39,7 +39,7 @@ void EntityManager::Render() {
     //Sort Entity by Layer and scope the lock on _entities
     {
         std::unique_lock<std::mutex> lck = GetLock();
-        std::sort(entities_.begin(),entities_.end(),[](const std::shared_ptr<Entity> lhs, const std::shared_ptr<Entity> & rhs){return(lhs->GetLayer() < rhs->GetLayer());});
+        entities_.sort([](const std::shared_ptr<Entity> lhs, const std::shared_ptr<Entity> & rhs){return(lhs->GetLayer() < rhs->GetLayer());});
     }
 
     for (auto & entity : entities_) {
@@ -78,12 +78,12 @@ void EntityManager::checkCollisions() {
 
         collisions_.clear();
 
-        for (int i = 0; i < entities_.size(); ++i) {
-            auto& thisEntity = entities_[i];
+        for (std::list<std::shared_ptr<Entity>>::iterator firstIter = entities_.begin() ; firstIter != entities_.end(); firstIter++) {
+            auto& thisEntity = *firstIter;
             if (thisEntity->HasComponent<ColliderComponent>()) {
                 std::shared_ptr<ColliderComponent> thisCollider = thisEntity->GetComponent<ColliderComponent>();
-                for (int j = i-1; j < entities_.size(); ++j) {
-                    auto& thatEntity = entities_[j];
+                for (std::list<std::shared_ptr<Entity>>::iterator secondIter = firstIter ; secondIter != entities_.end(); secondIter++) {
+                    auto& thatEntity = *secondIter;
                     if (thisEntity->GetName().compare(thatEntity->GetName()) != 0 && thatEntity->HasComponent<ColliderComponent>()) {
                         std::shared_ptr<ColliderComponent> thatCollider = thatEntity->GetComponent<ColliderComponent>();
                         if (Collision::CheckRectCollision(thisCollider->GetCollider(), thatCollider->GetCollider())) {
@@ -158,8 +158,8 @@ bool EntityManager::HasNoEntities() {
 //Validate Collions between two Entities. 
 bool EntityManager::validateCollision(const std::shared_ptr<ColliderComponent> & colliderOne, const std::shared_ptr<ColliderComponent> & colliderTwo, 
                                       const GameConstants::ColliderTag & collOneTag, const GameConstants::ColliderTag & collTwoTag) const {
-    if ((colliderOne->GetColliderTag() == collOneTag) && (colliderTwo->GetColliderTag() == collTwoTag) ||
-        (colliderOne->GetColliderTag() == collTwoTag) && (colliderTwo->GetColliderTag() == collOneTag)) {
+    if (((colliderOne->GetColliderTag() == collOneTag) && (colliderTwo->GetColliderTag() == collTwoTag)) ||
+        ((colliderOne->GetColliderTag() == collTwoTag) && (colliderTwo->GetColliderTag() == collOneTag))) {
             return true;
     }
     else {
@@ -170,6 +170,7 @@ bool EntityManager::validateCollision(const std::shared_ptr<ColliderComponent> &
 void EntityManager::destroyInactiveEntities() {
     for (auto it = entities_.begin(); it != entities_.end(); ++it) {
         if (!(*it)->IsActive()) {
+            //(*it)->Clear();
             entities_.erase(it);
         }
     }
@@ -177,9 +178,8 @@ void EntityManager::destroyInactiveEntities() {
 
 std::shared_ptr<Entity> EntityManager::AddEntity(const std::string & entityName, GameConstants::EntityType entityType, GameConstants::LayerType layerType) {
     std::unique_lock<std::mutex> lock = GetLock();
-    std::shared_ptr<Entity> entity = std::make_shared<Entity>(*this, entityName, entityType, layerType);
-    entities_.emplace_back(entity);
-    return entity;
+    entities_.emplace_back(std::make_shared<Entity>(*this, entityName, entityType, layerType));
+    return entities_.back();
 }
 
 std::vector<std::shared_ptr<Entity>> EntityManager::GetEntitiesByLayer(GameConstants::LayerType layerType) const {

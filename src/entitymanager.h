@@ -5,6 +5,7 @@
 #include <mutex>
 #include <set>
 #include <vector>
+#include <list>
 
 #include "gameconstants.h"
 #include "component.h"
@@ -42,7 +43,7 @@ class EntityManager {
         bool endCollisionsThread_{false};
         std::mutex mtx_;
 
-        std::vector<std::shared_ptr<Entity>> entities_{}; 
+        std::list<std::shared_ptr<Entity>> entities_{};
         std::vector<EntityManager::CollisionData> collisions_{};
 
         //Private Functions

@@ -13,11 +13,11 @@ class Component {
             virtual void Render() {};
             virtual void Init() {};
 
-            std::shared_ptr<Entity> GetOwner() { return(_owner); }
+            std::shared_ptr<Entity> GetOwner() { return(_owner.lock()); }
             void SetOwner(std::shared_ptr<Entity>  owner) { _owner = owner; }
 
         private:
-            std::shared_ptr<Entity> _owner;
+            std::weak_ptr<Entity> _owner;
 };
 
 #endif

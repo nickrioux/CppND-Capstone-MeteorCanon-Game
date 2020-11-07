@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <list>
 #include <string>
 #include <memory>
 
@@ -15,7 +16,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
     
     public :
         Entity(EntityManager& manager, const std::string & name, GameConstants::EntityType entityType, GameConstants::LayerType layerType);
-        ~Entity() {};
+    ~Entity() {};
 
         bool IsActive();
         void Update(float deltaTime);
@@ -55,7 +56,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
         std::string name_;
         GameConstants::EntityType entityType_;
         EntityManager & manager_;
-        std::vector<std::shared_ptr<Component>> components_;
+        std::list<std::shared_ptr<Component>> components_;
         GameConstants::LayerType layerType_;
         std::map<const std::type_info*, std::shared_ptr<Component> > componentTypeMap_;
         bool isActive_;
